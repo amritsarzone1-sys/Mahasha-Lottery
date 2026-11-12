@@ -89,7 +89,7 @@
                 </div>
             </div>
             <div class="pt-2 flex justify-between items-center text-[11px] text-indigo-200">
-                <span><i class="fa-solid fa-shield-halved text-emerald-400 mr-1"></i>Auto Ticket Generation</span>
+                <span><i class="fa-solid fa-shield-halved text-emerald-400 mr-1"></i>Secure UTR Verification</span>
                 <span class="text-amber-300 font-semibold" id="autoScheduleBadge"><i class="fa-solid fa-clock mr-1"></i>Pause 20:00 - 08:00</span>
             </div>
         </div>
@@ -137,14 +137,25 @@
                     </div>
                 </div>
 
+                <!-- UTR / UPI Reference Number -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">12-Digit UTR / UPI Reference No <span class="text-rose-500">*</span></label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2.5 text-slate-400 text-xs"><i class="fa-solid fa-receipt"></i></span>
+                        <input type="text" pattern="[0-9]{12}" maxlength="12" placeholder="Enter 12 Digit UTR after payment" id="payerUtr" required 
+                            class="w-full pl-8 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1">Payment karne ke baad UPI app se 12-digit UTR/Ref number yahan dalein.</p>
+                </div>
+
                 <!-- Pay Buttons -->
                 <div class="pt-2 space-y-2">
                     <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-lg hover:shadow-xl transition transform active:scale-98 flex items-center justify-center gap-2 text-base">
-                        <i class="fa-solid fa-bolt text-yellow-300 text-lg"></i> PAY VIA UPI APP
+                        <i class="fa-solid fa-bolt text-yellow-300 text-lg"></i> SUBMIT & VERIFY TICKET
                     </button>
                     
                     <button type="button" onclick="generateAndShowQR()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-4 rounded-xl transition text-xs flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-qrcode text-indigo-600"></i> Show QR Code to Scan
+                        <i class="fa-solid fa-qrcode text-indigo-600"></i> Show QR Code to Pay First
                     </button>
                 </div>
             </form>
@@ -152,10 +163,10 @@
 
         <!-- QR Code Modal / Drawer -->
         <div id="qrSection" class="hidden bg-white rounded-2xl p-5 shadow-lg border border-slate-100 text-center space-y-3 transition-all duration-300">
-            <h3 class="font-bold text-sm text-slate-700">Scan QR Code for Mahasha Evening</h3>
+            <h3 class="font-bold text-sm text-slate-700">Scan QR Code to Pay</h3>
             <div id="qrcode" class="flex justify-center p-3 bg-slate-50 rounded-xl border border-slate-200 w-fit mx-auto"></div>
             <p id="qrAmountText" class="text-xs font-bold text-emerald-600">Amount: ₹100</p>
-            <p class="text-[11px] text-slate-400">Scan using Google Pay, Paytm, PhonePe or any UPI App.</p>
+            <p class="text-[11px] text-slate-400">Google Pay, Paytm ya PhonePe se scan karke payment karein aur UTR number note kar lein.</p>
             <button onclick="document.getElementById('qrSection').classList.add('hidden')" class="text-xs text-rose-500 hover:underline font-medium pt-1">Close QR Code</button>
         </div>
 
@@ -163,15 +174,12 @@
         <div class="bg-white rounded-2xl p-4 shadow-md border border-slate-100 space-y-3">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
                 <div>
-                    <h2 class="text-sm font-bold text-slate-800">Payment Records</h2>
-                    <p class="text-[11px] text-slate-400">Saved transaction logs on this device</p>
+                    <h2 class="text-sm font-bold text-slate-800">Verified Payment Records</h2>
+                    <p class="text-[11px] text-slate-400">Successfully verified transaction logs</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <button onclick="exportToCSV()" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-2xs">
                         <i class="fa-solid fa-file-excel"></i> Export Excel
-                    </button>
-                    <button onclick="clearLogs()" title="Clear History" class="text-slate-400 hover:text-rose-500 p-1.5 rounded-lg transition">
-                        <i class="fa-solid fa-trash-can text-sm"></i>
                     </button>
                 </div>
             </div>
@@ -182,7 +190,7 @@
                     <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider text-[10px] sticky top-0">
                         <tr>
                             <th class="p-2 border-b">Ticket #</th>
-                            <th class="p-2 border-b">Time</th>
+                            <th class="p-2 border-b">UTR No</th>
                             <th class="p-2 border-b">Name</th>
                             <th class="p-2 border-b">Mobile</th>
                             <th class="p-2 border-b">Amount</th>
@@ -196,12 +204,12 @@
             
             <div id="noRecordsMsg" class="text-center py-6 text-slate-400 text-xs hidden">
                 <i class="fa-solid fa-folder-open text-2xl mb-1 opacity-50"></i>
-                <p>Abhi tak koi transaction record nahi hai.</p>
+                <p>Abhi tak koi verified record nahi hai.</p>
             </div>
         </div>
     </main>
 
-    <!-- SHOW RESULT SCROLLING VIEW MODAL -->
+    <!-- SHOW RESULT SCROLLING VIEW MODAL (Railgadi Style Continuous Upward Scroll) -->
     <div id="resultViewModal" class="fixed inset-0 bg-slate-950 z-50 hidden flex flex-col justify-between overflow-hidden">
         <!-- Top Controls Bar -->
         <div class="bg-indigo-950/90 text-white p-4 flex justify-between items-center border-b border-amber-400/40 z-20 shadow-lg">
@@ -241,9 +249,9 @@
                 <span class="text-[10px] font-mono text-amber-300/40">RESULT POINTER LINE</span>
             </div>
 
-            <!-- Auto Scrolling List Box -->
+            <!-- Auto Scrolling Railgadi Style Box -->
             <div id="scrollContainer" class="w-full max-w-md h-full overflow-hidden relative">
-                <div id="scrollContent" class="w-full space-y-3 py-12 transition-transform ease-linear">
+                <div id="scrollContent" class="absolute top-0 left-0 w-full will-change-transform">
                     <!-- Dynamic scrolling ticket cards inserted here -->
                 </div>
             </div>
@@ -326,6 +334,13 @@
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Change Admin Password</label>
                     <input type="password" id="configNewPassword" placeholder="Leave blank to keep current" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-mono focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
+
+                <!-- Admin Clear All Records Button -->
+                <div class="border-t border-slate-100 pt-3">
+                    <button onclick="adminClearAllRecords()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-trash-can"></i> Clear All Transaction Records
+                    </button>
+                </div>
             </div>
 
             <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
@@ -350,6 +365,7 @@
         // Scroll Control Variables
         let scrollAnimationId = null;
         let scrollYPos = 0;
+        let singleLoopHeight = 0;
         let currentSpeedStep = 0;
         const speedOptions = [1, 2, 4, 5]; // Speed multipliers
         let isAutoPaused = false;
@@ -413,6 +429,16 @@
             modal.classList.toggle('hidden');
         }
 
+        // Admin Clear All Records with confirmation prompt
+        function adminClearAllRecords() {
+            if (confirm("Are you sure you want to delete all records?")) {
+                localStorage.removeItem('mahasha_payment_logs');
+                renderLogs();
+                toggleAdminModal();
+                showToast("Sabhi records safalta se delete kar diye gaye hain.", "info");
+            }
+        }
+
         // Save Admin Settings
         function saveAdminConfig() {
             const newUpi = document.getElementById('configUpiId').value.trim();
@@ -457,13 +483,14 @@
             return `MEL-${randomNum}`;
         }
 
-        // Handle Payment Submit
+        // Handle Payment Submit with Mandatory UTR Verification
         function handlePayment(event) {
             event.preventDefault();
 
             const amount = upiConfig.amount;
             const mobile = document.getElementById('payerMobile').value;
             const name = document.getElementById('payerName').value;
+            const utr = document.getElementById('payerUtr').value.trim();
 
             if (!amount || amount <= 0) {
                 showToast("Invalid ticket amount!", "error");
@@ -475,24 +502,25 @@
                 return;
             }
 
+            if (utr.length !== 12) {
+                showToast("Kripya 12-digit valid UTR / UPI Reference Number enter karein!", "error");
+                return;
+            }
+
             const ticketNo = generateTicketNumber();
 
-            // Record Log entry before redirecting
-            logTransaction(amount, mobile, name, ticketNo);
+            // Record Log entry with verified UTR
+            logTransaction(amount, mobile, name, ticketNo, utr);
 
-            // Generate UPI Intent URI
-            const upiUrl = getUpiURI(amount);
+            showToast(`Ticket ${ticketNo} Verified & Saved Successfully!`, "success");
 
-            showToast(`Ticket ${ticketNo} Created! Opening UPI...`, "success");
-
-            // Redirect to mobile UPI App
-            setTimeout(() => {
-                window.location.href = upiUrl;
-            }, 600);
+            // Clear Form inputs after successful submission
+            document.getElementById('paymentForm').reset();
+            document.getElementById('formAmountDisplay').innerText = upiConfig.amount;
         }
 
-        // Log Transaction to LocalStorage
-        function logTransaction(amount, mobile, name, ticketNo) {
+        // Log Transaction to LocalStorage with UTR
+        function logTransaction(amount, mobile, name, ticketNo, utr) {
             const records = JSON.parse(localStorage.getItem('mahasha_payment_logs') || '[]');
             
             const newRecord = {
@@ -502,6 +530,7 @@
                 amount: parseFloat(amount).toFixed(2),
                 mobile: mobile,
                 name: name,
+                utr: utr,
                 targetUpi: upiConfig.upiId
             };
 
@@ -510,7 +539,7 @@
             renderLogs();
         }
 
-        // Render Logs Table
+        // Render Logs Table with UTR Column
         function renderLogs() {
             const records = JSON.parse(localStorage.getItem('mahasha_payment_logs') || '[]');
             const tableBody = document.getElementById('logsTableBody');
@@ -530,7 +559,7 @@
                 tr.className = 'hover:bg-slate-50 transition';
                 tr.innerHTML = `
                     <td class="p-2 border-b font-mono font-bold text-indigo-700">${item.ticketNo || 'MEL-000000'}</td>
-                    <td class="p-2 border-b font-medium text-slate-500">${item.timestamp}</td>
+                    <td class="p-2 border-b font-mono text-slate-600 font-semibold">${item.utr || 'N/A'}</td>
                     <td class="p-2 border-b font-semibold text-slate-800">${item.name}</td>
                     <td class="p-2 border-b text-slate-600">${item.mobile}</td>
                     <td class="p-2 border-b font-bold text-emerald-600">₹${item.amount}</td>
@@ -539,11 +568,11 @@
             });
         }
 
-        // RESULTS SCROLLING LOGIC
+        // RESULTS RAILGADI STYLE SCROLLING LOGIC (100% Seamless Infinite Upward Loop)
         function openResultView() {
             document.getElementById('resultViewModal').classList.remove('hidden');
             renderResultCards();
-            startAutoScroll();
+            startRailgadiScroll();
         }
 
         function closeResultView() {
@@ -565,176 +594,183 @@
             const container = document.getElementById('scrollContent');
             container.innerHTML = '';
 
+            let baseHTML = '';
             if (records.length === 0) {
-                container.innerHTML = `<div class="text-center py-20 text-slate-400 font-medium">Koi Tickets Record nahi mile! Pehle ticket book karein.</div>`;
-                return;
-            }
-
-            // Duplicate records to form seamless smooth loop
-            const listToRender = [...records, ...records, ...records];
-
-            listToRender.forEach((item, index) => {
-                const card = document.createElement('div');
-                card.className = "bg-slate-800 border border-slate-700/80 rounded-xl p-3.5 mx-6 shadow-md text-white flex justify-between items-center transform transition";
-                card.innerHTML = `
-                    <div class="space-y-0.5">
-                        <span class="bg-amber-400/20 text-amber-300 font-mono font-bold px-2 py-0.5 rounded text-xs border border-amber-400/30">
-                            ${item.ticketNo || 'MEL-000000'}
-                        </span>
-                        <h4 class="font-bold text-sm text-slate-100 pt-1">${item.name}</h4>
-                        <p class="text-[11px] text-slate-400"><i class="fa-solid fa-phone text-[9px] mr-1"></i>${item.mobile}</p>
+                baseHTML = `
+                    <div class="pb-3 px-4">
+                        <div class="p-4 bg-slate-800/90 border border-slate-700 rounded-2xl shadow-lg text-center">
+                            <span class="text-xs font-mono text-amber-400 font-bold">MEL-548021 | UTR: 402918237102</span>
+                            <h4 class="text-lg font-black text-white mt-0.5">5480 - 1st Prize</h4>
+                            <p class="text-xs text-indigo-300 font-medium">Dummi-Record1- 9876543210</p>
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <span class="text-xs text-emerald-400 font-extrabold font-lottery block">₹${item.amount}</span>
-                        <span class="text-[10px] text-slate-400">${item.timestamp}</span>
+                    <div class="pb-3 px-4">
+                        <div class="p-4 bg-slate-800/90 border border-slate-700 rounded-2xl shadow-lg text-center">
+                            <span class="text-xs font-mono text-amber-400 font-bold">MEL-123456 | UTR: 309281746591</span>
+                            <h4 class="text-lg font-black text-white mt-0.5">1234 - 2nd Prize</h4>
+                            <p class="text-xs text-indigo-300 font-medium">Dummi-Record2 - 9123456789</p>
+                        </div>
+                    </div>
+                    <div class="pb-3 px-4">
+                        <div class="p-4 bg-slate-800/90 border border-slate-700 rounded-2xl shadow-lg text-center">
+                            <span class="text-xs font-mono text-amber-400 font-bold">MEL-987654 | UTR: 501928374650</span>
+                            <h4 class="text-lg font-black text-white mt-0.5">9876 - Lucky No</h4>
+                            <p class="text-xs text-indigo-300 font-medium">Dummi-Record2 - 9988776655</p>
+                        </div>
                     </div>
                 `;
-                container.appendChild(card);
-            });
-        }
-
-        function checkISTAutoPause() {
-            const now = new Date();
-            const currentHour = now.getHours(); // 0 to 23
-
-            const start = upiConfig.pauseStart !== undefined ? upiConfig.pauseStart : 20; // 8 PM
-            const end = upiConfig.pauseEnd !== undefined ? upiConfig.pauseEnd : 8;     // 8 AM
-
-            let shouldPause = false;
-
-            if (start > end) {
-                // Overnight pause (e.g. 20:00 to 08:00)
-                if (currentHour >= start || currentHour < end) {
-                    shouldPause = true;
-                }
             } else {
-                // Same day pause
-                if (currentHour >= start && currentHour < end) {
-                    shouldPause = true;
-                }
+                records.forEach(item => {
+                    baseHTML += `
+                        <div class="pb-3 px-4">
+                            <div class="p-4 bg-slate-800/90 border border-slate-700 rounded-2xl shadow-lg text-center">
+                                <span class="text-xs font-mono text-amber-400 font-bold">${item.ticketNo} | UTR: ${item.utr}</span>
+                                <h4 class="text-lg font-black text-white mt-0.5">${item.name}</h4>
+                                <p class="text-xs text-indigo-300 font-medium">Mobile: ${item.mobile} | Paid: ₹${item.amount}</p>
+                            </div>
+                        </div>
+                    `;
+                });
             }
 
-            isAutoPaused = shouldPause;
-            const statusText = document.getElementById('resultStatusText');
-            if (shouldPause) {
-                statusText.innerText = `Status: PAUSED (Auto Scheduled ${start}:00 - ${end}:00 IST)`;
-                statusText.className = "text-[10px] text-amber-400 font-bold";
-            } else {
-                statusText.innerText = "Status: SCROLLING LIST WILL BE STOPED BY EVENING AT 8:00 PM SHARP";
-                statusText.className = "text-[10px] text-emerald-400 font-bold";
+            // Pehle ek baar daal kar uski asli height naap lete hain
+            container.innerHTML = baseHTML;
+            const baseHeight = container.offsetHeight;
+
+            // Agar records kam hain (screen se chhote hain), to pehle ek single loop ko screen se bada banayein
+            const viewportHeight = document.getElementById('scrollContainer').offsetHeight || 800;
+            let repeatCount = 1;
+            if (baseHeight > 0 && baseHeight < viewportHeight * 1.5) {
+                repeatCount = Math.ceil((viewportHeight * 1.5) / baseHeight);
             }
 
-            return shouldPause;
-        }
-
-        function startAutoScroll() {
-            const container = document.getElementById('scrollContent');
+            const singleSetHTML = baseHTML.repeat(repeatCount);
             
+            // Ab exact 2 sets daalte hain taaki aadha hissa cross hone par 100% invisible reset ho
+            container.innerHTML = singleSetHTML + singleSetHTML;
+            singleLoopHeight = container.offsetHeight / 2;
+        }
+
+        function startRailgadiScroll() {
+            if (scrollAnimationId) cancelAnimationFrame(scrollAnimationId);
+            scrollYPos = 0;
+            const container = document.getElementById('scrollContent');
+
             function step() {
-                const paused = checkISTAutoPause();
-                
-                if (!paused && container.scrollHeight > 0) {
-                    const speed = speedOptions[currentSpeedStep];
-                    scrollYPos += speed * 0.8;
+                if (singleLoopHeight > 0) {
+                    const speed = speedOptions[currentSpeedStep] * 0.8;
+                    scrollYPos += speed;
 
-                    // Infinite Seamless Vertical Loop
-                    if (scrollYPos >= container.scrollHeight / 3) {
-                        scrollYPos = 0;
+                    // Modulo (%) ka istemal karne se jab bhi 1 set poora guzarta hai, bacha hua pixel aage chalta rehta hai, koi jhatka nahi lagta
+                    if (scrollYPos >= singleLoopHeight) {
+                        scrollYPos = scrollYPos % singleLoopHeight;
                     }
-                    container.style.transform = `translateY(-${scrollYPos}px)`;
-                }
 
+                    container.style.transform = `translate3d(0, -${scrollYPos}px, 0)`;
+                }
                 scrollAnimationId = requestAnimationFrame(step);
             }
 
-            if (scrollAnimationId) cancelAnimationFrame(scrollAnimationId);
             scrollAnimationId = requestAnimationFrame(step);
         }
 
+        // IST Clock and Auto-Pause Schedule verification
         function updateISTClock() {
             const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: true });
-            const clock = document.getElementById('currentTimeDisplay');
-            if (clock) {
-                clock.innerText = `${timeStr} IST`;
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const istTime = new Date(utc + (3600000 * 5.5));
+            
+            const hours = istTime.getHours();
+            const minutes = istTime.getMinutes();
+            const seconds = istTime.getSeconds();
+
+            const timeStr = String(hours).padStart(2,'0') + ":" + String(minutes).padStart(2,'0') + ":" + String(seconds).padStart(2,'0') + " IST";
+            const clockEl = document.getElementById('currentTimeDisplay');
+            if(clockEl) clockEl.innerText = timeStr;
+
+            const pStart = upiConfig.pauseStart !== undefined ? upiConfig.pauseStart : 20;
+            const pEnd = upiConfig.pauseEnd !== undefined ? upiConfig.pauseEnd : 8;
+
+            let paused = false;
+            if (pStart > pEnd) {
+                if (hours >= pStart || hours < pEnd) {
+                    paused = true;
+                }
+            } else {
+                if (hours >= pStart && hours < pEnd) {
+                    paused = true;
+                }
+            }
+
+            isAutoPaused = paused;
+            const statusText = document.getElementById('resultStatusText');
+            if (statusText) {
+                if (paused) {
+                    statusText.innerText = "Status: Auto-Paused (Night Schedule Active)";
+                    statusText.className = "text-[10px] text-amber-400 font-bold";
+                } else {
+                    statusText.innerText = "Status: Live Draw Running";
+                    statusText.className = "text-[10px] text-emerald-400 font-bold";
+                }
             }
         }
 
-        // Generate Dynamic QR Code
-        function generateAndShowQR() {
-            const amount = upiConfig.amount;
-            const qrContainer = document.getElementById('qrcode');
-            qrContainer.innerHTML = ''; // Clear previous QR
-
-            const upiUrl = getUpiURI(amount);
-
-            new QRCode(qrContainer, {
-                text: upiUrl,
-                width: 170,
-                height: 170,
-                colorDark : "#1e1b4b",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.M
-            });
-
-            document.getElementById('qrAmountText').innerText = `Ticket Price: ₹${amount}`;
-            document.getElementById('qrSection').classList.remove('hidden');
+        // Utility Toast Message
+        function showToast(message, type = "success") {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.className = `p-3 rounded-xl text-xs font-medium text-center transition-all duration-300 shadow-md ${
+                type === 'error' ? 'bg-rose-500 text-white' : type === 'info' ? 'bg-indigo-500 text-white' : 'bg-emerald-500 text-white'
+            }`;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
         }
 
-        // Export Logs to Excel/CSV
+        // Export to CSV / Excel
         function exportToCSV() {
             const records = JSON.parse(localStorage.getItem('mahasha_payment_logs') || '[]');
-            
             if (records.length === 0) {
-                showToast("Export ke liye koi record nahi hai!", "error");
+                showToast("Export karne ke liye koi record nahi hai!", "error");
                 return;
             }
 
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "S.No,Ticket Number,Date & Time,Customer Name,Mobile Number,Amount (INR),Received At UPI\n";
-
-            records.forEach((row, index) => {
-                const line = `${index + 1},"${row.ticketNo || 'MEL-000000'}","${row.timestamp}","${row.name}","${row.mobile}",${row.amount},"${row.targetUpi}"`;
-                csvContent += line + "\n";
+            let csvContent = "data:text/csv;charset=utf-8,Ticket Number,UTR Number,Timestamp,Name,Mobile,Amount,UPI ID\r\n";
+            records.forEach(row => {
+                csvContent += `"${row.ticketNo}","${row.utr}","${row.timestamp}","${row.name}","${row.mobile}","${row.amount}","${row.targetUpi}"\r\n`;
             });
 
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `Mahasha_Lottery_Tickets_${new Date().toISOString().slice(0,10)}.csv`);
+            link.setAttribute("download", "Mahasha_Lottery_Records.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-
-            showToast("Excel/CSV File Download ho gayi!", "success");
+            showToast("Excel file download ho gayi hai!", "success");
         }
 
-        // Clear Records
-        function clearLogs() {
-            if (confirm("Kya aap saare saved payment records delete karna chahte hain?")) {
-                localStorage.removeItem('mahasha_payment_logs');
-                renderLogs();
-                showToast("Saare records delete ho gaye!", "info");
-            }
-        }
-
-        // Helper Toast Notification
-        function showToast(message, type = "info") {
-            const toast = document.getElementById('toast');
-            toast.innerText = message;
-            toast.className = "p-3 rounded-xl text-xs font-semibold text-center transition-all duration-300 shadow-md block";
+        // QR Code Generator Function
+        function generateAndShowQR() {
+            const amount = upiConfig.amount;
+            const qrSection = document.getElementById('qrSection');
+            const qrcodeContainer = document.getElementById('qrcode');
             
-            if (type === "success") {
-                toast.classList.add("bg-emerald-500", "text-white");
-            } else if (type === "error") {
-                toast.classList.add("bg-rose-500", "text-white");
-            } else {
-                toast.classList.add("bg-indigo-600", "text-white");
-            }
+            qrcodeContainer.innerHTML = "";
+            const upiString = getUpiURI(amount);
 
-            setTimeout(() => {
-                toast.classList.add("hidden");
-            }, 3000);
+            new QRCode(qrcodeContainer, {
+                text: upiString,
+                width: 160,
+                height: 160,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            document.getElementById('qrAmountText').innerText = `Amount: ₹${amount}`;
+            qrSection.classList.remove('hidden');
         }
     </script>
 </body>
