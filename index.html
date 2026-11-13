@@ -9,14 +9,14 @@
     <meta property="og:description" content="Official lottery draw. Participate securely and check live results instantly.">
     <meta property="og:image" content="https://amritsarzone1-sys.github.io/Mahasha-Lottery/thumbnail.png">
     <meta property="og:type" content="website">
-    
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- QR Code Generator Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    
+
     <!-- Firebase Realtime Database SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -41,7 +41,7 @@
     <header class="lottery-gradient text-white py-5 px-4 shadow-xl border-b-4 border-amber-400 relative overflow-hidden">
         <div class="absolute -top-3 -left-3 text-amber-400/20 text-5xl"><i class="fa-solid fa-star"></i></div>
         <div class="absolute top-2 -right-2 text-yellow-300/20 text-6xl"><i class="fa-solid fa-ticket"></i></div>
-        
+
         <div class="max-w-md mx-auto flex justify-between items-center relative z-10">
             <div class="flex items-center space-x-3">
                 <div class="bg-amber-400 text-indigo-950 p-2.5 rounded-2xl shadow-lg transform -rotate-3 border-2 border-white">
@@ -62,7 +62,7 @@
                     </p>
                 </div>
             </div>
-            
+
             <div class="flex items-center gap-2">
                 <!-- Show Result Button -->
                 <button onclick="openResultView()" class="bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-indigo-950 font-black px-3 py-2 rounded-xl text-xs flex flex-col items-center gap-0.5 shadow-lg active:scale-95 border border-yellow-200">
@@ -156,7 +156,7 @@
                     <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-lg hover:shadow-xl transition transform active:scale-98 flex items-center justify-center gap-2 text-base">
                         <i class="fa-solid fa-bolt text-yellow-300 text-lg"></i> SUBMIT & VERIFY TICKET
                     </button>
-                    
+
                     <button type="button" onclick="generateAndShowQR()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-4 rounded-xl transition text-xs flex items-center justify-center gap-2">
                         <i class="fa-solid fa-qrcode text-indigo-600"></i> Show QR Code to Pay First
                     </button>
@@ -175,7 +175,7 @@
 
         <!-- Total Collection & Payment History Section -->
         <div class="bg-white rounded-2xl p-4 shadow-md border border-slate-100 space-y-3">
-            
+
             <!-- Total Collected Amount Summary Banner -->
             <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-xl p-3.5 shadow-sm flex justify-between items-center">
                 <div>
@@ -213,7 +213,7 @@
                     <tbody id="logsTableBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
                 </table>
             </div>
-            
+
             <div id="noRecordsMsg" class="text-center py-6 text-slate-400 text-xs hidden">
                 <i class="fa-solid fa-folder-open text-2xl mb-1 opacity-50"></i>
                 <p>Abhi tak koi verified record nahi hai.</p>
@@ -323,57 +323,21 @@
                     <input type="text" id="configPayeeName" value="Mahasha Evening Lottery" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
 
-                <!-- Date + Time Draw / Pause Schedule -->
+                <!-- Date + Time Draw / Pause Schedule (Calendar & Clock View) -->
                 <div class="border-t border-slate-100 pt-2 space-y-2">
                     <label class="block text-xs font-bold text-indigo-950 flex items-center gap-1">
-                        <i class="fa-solid fa-calendar-days text-amber-500"></i> Date-Time Schedule (Optional)
+                        <i class="fa-solid fa-calendar-days text-amber-500"></i> Draw Schedule (Date & Time)
                     </label>
                     <div>
                         <span class="text-[10px] text-slate-600 font-semibold block mb-0.5">Stop / Pause Start (Date & Time)</span>
-                        <input type="datetime-local" id="configPauseStartDT" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
+                        <input type="datetime-local" id="configPauseStartDT" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 bg-white">
                     </div>
                     <div>
                         <span class="text-[10px] text-slate-600 font-semibold block mb-0.5">Resume / Pause End (Date & Time)</span>
-                        <input type="datetime-local" id="configPauseEndDT" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
+                        <input type="datetime-local" id="configPauseEndDT" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 bg-white">
                     </div>
-                </div>
-
-                <!-- NEW: Weekly Day-based Schedule (Every Mon, Tue, Wed...) -->
-                <div class="border-t border-slate-100 pt-2 space-y-2">
-                    <label class="block text-xs font-bold text-indigo-950 flex items-center gap-1">
-                        <i class="fa-solid fa-calendar-week text-amber-500"></i> Weekly Recurring Schedule (By Days)
-                    </label>
-                    <p class="text-[10px] text-slate-500">Har hafte ke kis din se kis din tak draw chalega ya rukega:</p>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <span class="text-[10px] text-slate-600 font-semibold block mb-0.5">Start Day</span>
-                            <select id="configStartDay" class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 bg-white">
-                                <option value="">-- Always Run --</option>
-                                <option value="1">Monday</option>
-                                <option value="2">Tuesday</option>
-                                <option value="3">Wednesday</option>
-                                <option value="4">Thursday</option>
-                                <option value="5">Friday</option>
-                                <option value="6">Saturday</option>
-                                <option value="0">Sunday</option>
-                            </select>
-                        </div>
-                        <div>
-                            <span class="text-[10px] text-slate-600 font-semibold block mb-0.5">Stop Day</span>
-                            <select id="configStopDay" class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 bg-white">
-                                <option value="">-- None --</option>
-                                <option value="1">Monday</option>
-                                <option value="2">Tuesday</option>
-                                <option value="3">Wednesday</option>
-                                <option value="4">Thursday</option>
-                                <option value="5">Friday</option>
-                                <option value="6">Saturday</option>
-                                <option value="0">Sunday</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button type="button" onclick="clearScheduleDates()" class="text-[10px] text-indigo-600 hover:underline font-semibold">
-                        Clear All Schedules (Hamesha Chalu Rakhein)
+                    <button type="button" onclick="clearScheduleDates()" class="text-[10px] text-indigo-600 hover:underline font-semibold pt-1">
+                        Clear Schedule (Hamesha Chalu Rakhein)
                     </button>
                 </div>
 
@@ -426,8 +390,6 @@
             amount: "10",
             pauseStartDT: "",
             pauseEndDT: "",
-            startDay: "",
-            stopDay: "",
             adminPass: "1234"
         };
 
@@ -451,7 +413,7 @@
                 if (savedConfig) upiConfig = JSON.parse(savedConfig);
                 allRecords = JSON.parse(localStorage.getItem('mahasha_payment_logs') || '[]');
                 currentSpeedStep = parseInt(localStorage.getItem('mahasha_scroll_speed') || '0', 10);
-                
+
                 updateConfigUI();
                 renderLogs();
                 updateSpeedUI();
@@ -506,15 +468,10 @@
             document.getElementById('configAmount').value = upiConfig.amount;
             document.getElementById('configPauseStartDT').value = upiConfig.pauseStartDT || '';
             document.getElementById('configPauseEndDT').value = upiConfig.pauseEndDT || '';
-            document.getElementById('configStartDay').value = upiConfig.startDay !== undefined ? upiConfig.startDay : '';
-            document.getElementById('configStopDay').value = upiConfig.stopDay !== undefined ? upiConfig.stopDay : '';
             document.getElementById('configNewPassword').value = '';
 
             const schedBadge = document.getElementById('autoScheduleBadge');
-            if (upiConfig.startDay !== "" && upiConfig.stopDay !== "") {
-                const daysMap = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-                schedBadge.innerHTML = `<i class="fa-solid fa-calendar-week mr-1"></i>Weekly: ${daysMap[upiConfig.startDay]} to ${daysMap[upiConfig.stopDay]}`;
-            } else if (upiConfig.pauseStartDT && upiConfig.pauseEndDT) {
+            if (upiConfig.pauseStartDT && upiConfig.pauseEndDT) {
                 schedBadge.innerHTML = `<i class="fa-solid fa-calendar-check mr-1"></i>Date Schedule Active`;
             } else {
                 schedBadge.innerHTML = `<i class="fa-solid fa-play-circle mr-1"></i>24x7 Continuous Draw`;
@@ -553,8 +510,6 @@
         function clearScheduleDates() {
             document.getElementById('configPauseStartDT').value = '';
             document.getElementById('configPauseEndDT').value = '';
-            document.getElementById('configStartDay').value = '';
-            document.getElementById('configStopDay').value = '';
         }
 
         function adminClearAllRecords() {
@@ -577,8 +532,6 @@
             const newAmt = document.getElementById('configAmount').value.trim();
             const pStartDT = document.getElementById('configPauseStartDT').value;
             const pEndDT = document.getElementById('configPauseEndDT').value;
-            const startDay = document.getElementById('configStartDay').value;
-            const stopDay = document.getElementById('configStopDay').value;
             const newPass = document.getElementById('configNewPassword').value.trim();
 
             if (!newUpi || !newAmt || newAmt <= 0) {
@@ -591,8 +544,6 @@
             upiConfig.amount = newAmt;
             upiConfig.pauseStartDT = pStartDT;
             upiConfig.pauseEndDT = pEndDT;
-            upiConfig.startDay = startDay;
-            upiConfig.stopDay = stopDay;
             if (newPass) {
                 upiConfig.adminPass = newPass;
             }
@@ -793,7 +744,7 @@
             scrollAnimationId = requestAnimationFrame(step);
         }
 
-        // Date & Time + Weekly Recurring Schedule Verification
+        // Date & Time Schedule Verification
         function updateISTClockAndSchedule() {
             const now = new Date();
             const timeStr = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false }) + " IST";
@@ -802,32 +753,12 @@
 
             let paused = false;
 
-            // 1. Check Date-Time Schedule if set
             if (upiConfig.pauseStartDT && upiConfig.pauseEndDT) {
                 const startMs = new Date(upiConfig.pauseStartDT).getTime();
                 const endMs = new Date(upiConfig.pauseEndDT).getTime();
                 const nowMs = now.getTime();
                 if (nowMs >= startMs && nowMs <= endMs) {
                     paused = true;
-                }
-            }
-
-            // 2. Check Weekly Recurring Schedule by Day if set
-            if (upiConfig.startDay !== "" && upiConfig.stopDay !== "" && !paused) {
-                const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, ... 6 = Saturday
-                const sDay = parseInt(upiConfig.startDay, 10);
-                const eDay = parseInt(upiConfig.stopDay, 10);
-
-                if (sDay <= eDay) {
-                    // Normal range within same week (e.g. Mon(1) to Fri(5))
-                    if (currentDay >= sDay && currentDay <= eDay) {
-                        paused = true; // Stop / Pause during this range
-                    }
-                } else {
-                    // Range wraps around weekend (e.g. Fri(5) to Mon(1))
-                    if (currentDay >= sDay || currentDay <= eDay) {
-                        paused = true;
-                    }
                 }
             }
 
