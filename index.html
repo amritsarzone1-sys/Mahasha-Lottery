@@ -326,9 +326,8 @@
                 <!-- Date + Time Draw / Pause Schedule -->
                 <div class="border-t border-slate-100 pt-2 space-y-2">
                     <label class="block text-xs font-bold text-indigo-950 flex items-center gap-1">
-                        <i class="fa-solid fa-calendar-days text-amber-500"></i> Draw Stop / Auto-Pause Schedule (Date & Time)
+                        <i class="fa-solid fa-calendar-days text-amber-500"></i> Date-Time Schedule (Optional)
                     </label>
-                    <p class="text-[10px] text-slate-500">Is Date & Time ke beech result scrolling ruk jayegi (jaise Sunday Draw ke liye):</p>
                     <div>
                         <span class="text-[10px] text-slate-600 font-semibold block mb-0.5">Stop / Pause Start (Date & Time)</span>
                         <input type="datetime-local" id="configPauseStartDT" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
@@ -337,8 +336,44 @@
                         <span class="text-[10px] text-slate-600 font-semibold block mb-0.5">Resume / Pause End (Date & Time)</span>
                         <input type="datetime-local" id="configPauseEndDT" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
                     </div>
+                </div>
+
+                <!-- NEW: Weekly Day-based Schedule (Every Mon, Tue, Wed...) -->
+                <div class="border-t border-slate-100 pt-2 space-y-2">
+                    <label class="block text-xs font-bold text-indigo-950 flex items-center gap-1">
+                        <i class="fa-solid fa-calendar-week text-amber-500"></i> Weekly Recurring Schedule (By Days)
+                    </label>
+                    <p class="text-[10px] text-slate-500">Har hafte ke kis din se kis din tak draw chalega ya rukega:</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <span class="text-[10px] text-slate-600 font-semibold block mb-0.5">Start Day</span>
+                            <select id="configStartDay" class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 bg-white">
+                                <option value="">-- Always Run --</option>
+                                <option value="1">Monday</option>
+                                <option value="2">Tuesday</option>
+                                <option value="3">Wednesday</option>
+                                <option value="4">Thursday</option>
+                                <option value="5">Friday</option>
+                                <option value="6">Saturday</option>
+                                <option value="0">Sunday</option>
+                            </select>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-600 font-semibold block mb-0.5">Stop Day</span>
+                            <select id="configStopDay" class="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 bg-white">
+                                <option value="">-- None --</option>
+                                <option value="1">Monday</option>
+                                <option value="2">Tuesday</option>
+                                <option value="3">Wednesday</option>
+                                <option value="4">Thursday</option>
+                                <option value="5">Friday</option>
+                                <option value="6">Saturday</option>
+                                <option value="0">Sunday</option>
+                            </select>
+                        </div>
+                    </div>
                     <button type="button" onclick="clearScheduleDates()" class="text-[10px] text-indigo-600 hover:underline font-semibold">
-                        Clear Schedule (Hamesha Chalu Rakhein)
+                        Clear All Schedules (Hamesha Chalu Rakhein)
                     </button>
                 </div>
 
@@ -391,6 +426,8 @@
             amount: "10",
             pauseStartDT: "",
             pauseEndDT: "",
+            startDay: "",
+            stopDay: "",
             adminPass: "1234"
         };
 
@@ -399,7 +436,6 @@
         let scrollYPos = 0;
         let singleLoopHeight = 0;
         let currentSpeedStep = 0;
-        // Updated Speed Options (3x faster base speed and progressive multipliers)
         const speedOptions = [3, 6, 9, 12, 15];
         let isAutoPaused = false;
 
@@ -424,9 +460,8 @@
             setInterval(updateISTClockAndSchedule, 1000);
         };
 
-        // Firebase Realtime Listeners (Syncs Config, Records, and Speed across all users)
+        // Firebase Realtime Listeners
         function initCloudListeners() {
-            // 1. Sync Admin Config
             db.ref('lottery/config').on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -437,7 +472,6 @@
                 }
             });
 
-            // 2. Sync Payment Records
             db.ref('lottery/records').on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -451,7 +485,6 @@
                 }
             });
 
-            // 3. Sync Global Scroll Speed across all users
             db.ref('lottery/scrollSpeedStep').on('value', (snapshot) => {
                 const step = snapshot.val();
                 if (step !== null && step !== undefined) {
@@ -473,12 +506,16 @@
             document.getElementById('configAmount').value = upiConfig.amount;
             document.getElementById('configPauseStartDT').value = upiConfig.pauseStartDT || '';
             document.getElementById('configPauseEndDT').value = upiConfig.pauseEndDT || '';
+            document.getElementById('configStartDay').value = upiConfig.startDay !== undefined ? upiConfig.startDay : '';
+            document.getElementById('configStopDay').value = upiConfig.stopDay !== undefined ? upiConfig.stopDay : '';
             document.getElementById('configNewPassword').value = '';
 
             const schedBadge = document.getElementById('autoScheduleBadge');
-            if (upiConfig.pauseStartDT && upiConfig.pauseEndDT) {
-                const startFmt = new Date(upiConfig.pauseStartDT).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-                schedBadge.innerHTML = `<i class="fa-solid fa-calendar-check mr-1"></i>Stop: ${startFmt}`;
+            if (upiConfig.startDay !== "" && upiConfig.stopDay !== "") {
+                const daysMap = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                schedBadge.innerHTML = `<i class="fa-solid fa-calendar-week mr-1"></i>Weekly: ${daysMap[upiConfig.startDay]} to ${daysMap[upiConfig.stopDay]}`;
+            } else if (upiConfig.pauseStartDT && upiConfig.pauseEndDT) {
+                schedBadge.innerHTML = `<i class="fa-solid fa-calendar-check mr-1"></i>Date Schedule Active`;
             } else {
                 schedBadge.innerHTML = `<i class="fa-solid fa-play-circle mr-1"></i>24x7 Continuous Draw`;
             }
@@ -489,7 +526,6 @@
             document.getElementById('speedMultiplier').innerText = `${newSpeed}x`;
         }
 
-        // Password Modal
         function promptAdminPassword() {
             document.getElementById('adminPasswordInput').value = '';
             document.getElementById('passwordModal').classList.remove('hidden');
@@ -517,9 +553,10 @@
         function clearScheduleDates() {
             document.getElementById('configPauseStartDT').value = '';
             document.getElementById('configPauseEndDT').value = '';
+            document.getElementById('configStartDay').value = '';
+            document.getElementById('configStopDay').value = '';
         }
 
-        // Clear All Records
         function adminClearAllRecords() {
             if (confirm("Are you sure you want to delete all records?")) {
                 if (isCloudActive) {
@@ -534,13 +571,14 @@
             }
         }
 
-        // Save Admin Settings
         function saveAdminConfig() {
             const newUpi = document.getElementById('configUpiId').value.trim();
             const newName = document.getElementById('configPayeeName').value.trim();
             const newAmt = document.getElementById('configAmount').value.trim();
             const pStartDT = document.getElementById('configPauseStartDT').value;
             const pEndDT = document.getElementById('configPauseEndDT').value;
+            const startDay = document.getElementById('configStartDay').value;
+            const stopDay = document.getElementById('configStopDay').value;
             const newPass = document.getElementById('configNewPassword').value.trim();
 
             if (!newUpi || !newAmt || newAmt <= 0) {
@@ -553,6 +591,8 @@
             upiConfig.amount = newAmt;
             upiConfig.pauseStartDT = pStartDT;
             upiConfig.pauseEndDT = pEndDT;
+            upiConfig.startDay = startDay;
+            upiConfig.stopDay = stopDay;
             if (newPass) {
                 upiConfig.adminPass = newPass;
             }
@@ -579,10 +619,8 @@
             return `MEL-${Math.floor(100000 + Math.random() * 900000)}`;
         }
 
-        // Handle Payment Submit
         function handlePayment(event) {
             event.preventDefault();
-
             const amount = upiConfig.amount;
             const mobile = document.getElementById('payerMobile').value;
             const name = document.getElementById('payerName').value;
@@ -598,7 +636,6 @@
                 return;
             }
 
-            // Duplicate UTR Check
             if (allRecords.some(r => r.utr === utr)) {
                 showToast("Yeh UTR number pehle se register ho chuka hai!", "error");
                 return;
@@ -629,13 +666,11 @@
             document.getElementById('formAmountDisplay').innerText = upiConfig.amount;
         }
 
-        // Render Logs & Total Collected Amount
         function renderLogs() {
             const tableBody = document.getElementById('logsTableBody');
             const noRecordsMsg = document.getElementById('noRecordsMsg');
             tableBody.innerHTML = '';
 
-            // Calculate Total Collected Amount
             let totalAmount = 0;
             allRecords.forEach(item => {
                 totalAmount += parseFloat(item.amount || 0);
@@ -665,7 +700,6 @@
             });
         }
 
-        // RESULT SCROLLING VIEW
         function openResultView() {
             document.getElementById('resultViewModal').classList.remove('hidden');
             renderResultCards();
@@ -677,7 +711,6 @@
             if (scrollAnimationId) cancelAnimationFrame(scrollAnimationId);
         }
 
-        // Global Speed Cycle (Updates Cloud for ALL users!)
         function cycleScrollSpeed() {
             currentSpeedStep = (currentSpeedStep + 1) % speedOptions.length;
             const newSpeed = speedOptions[currentSpeedStep];
@@ -760,7 +793,7 @@
             scrollAnimationId = requestAnimationFrame(step);
         }
 
-        // Date & Time Schedule Verification
+        // Date & Time + Weekly Recurring Schedule Verification
         function updateISTClockAndSchedule() {
             const now = new Date();
             const timeStr = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false }) + " IST";
@@ -768,12 +801,33 @@
             if (clockEl) clockEl.innerText = timeStr;
 
             let paused = false;
+
+            // 1. Check Date-Time Schedule if set
             if (upiConfig.pauseStartDT && upiConfig.pauseEndDT) {
                 const startMs = new Date(upiConfig.pauseStartDT).getTime();
                 const endMs = new Date(upiConfig.pauseEndDT).getTime();
                 const nowMs = now.getTime();
                 if (nowMs >= startMs && nowMs <= endMs) {
                     paused = true;
+                }
+            }
+
+            // 2. Check Weekly Recurring Schedule by Day if set
+            if (upiConfig.startDay !== "" && upiConfig.stopDay !== "" && !paused) {
+                const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, ... 6 = Saturday
+                const sDay = parseInt(upiConfig.startDay, 10);
+                const eDay = parseInt(upiConfig.stopDay, 10);
+
+                if (sDay <= eDay) {
+                    // Normal range within same week (e.g. Mon(1) to Fri(5))
+                    if (currentDay >= sDay && currentDay <= eDay) {
+                        paused = true; // Stop / Pause during this range
+                    }
+                } else {
+                    // Range wraps around weekend (e.g. Fri(5) to Mon(1))
+                    if (currentDay >= sDay || currentDay <= eDay) {
+                        paused = true;
+                    }
                 }
             }
 
@@ -796,6 +850,7 @@
             toast.className = `p-3 rounded-xl text-xs font-medium text-center transition-all duration-300 shadow-md ${
                 type === 'error' ? 'bg-rose-500 text-white' : type === 'info' ? 'bg-indigo-500 text-white' : 'bg-emerald-500 text-white'
             }`;
+            toast.classList.add('block');
             toast.classList.remove('hidden');
             setTimeout(() => toast.classList.add('hidden'), 3000);
         }
