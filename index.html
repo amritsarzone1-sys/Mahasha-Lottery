@@ -4,18 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mahasha Evening Lottery</title>
-<!-- Open Graph / WhatsApp Preview Tags -->
-<meta property="og:title" content="Mahasha Evening Lottery - Official Daily Draw">
-<meta property="og:description" content="Official daily lottery draw. Participate securely and check live results instantly.">
-<meta property="og:image" content="https://images.unsplash.com/photo-1518609878373-06d740f60d8b">
-<meta property="og:url" content="https://mahashalottery.netlify.app">
-<meta property="og:type" content="website">
+    <!-- Open Graph / WhatsApp Preview Tags -->
+    <meta property="og:title" content="Mahasha Evening Lottery - Official Draw">
+    <meta property="og:description" content="Official lottery draw. Participate securely and check live results instantly.">
+    <meta property="og:image" content="https://amritsarzone1-sys.github.io/Mahasha-Lottery/thumbnail.png">
+    <meta property="og:type" content="website">
+    
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- QR Code Generator Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <!-- Firebase Realtime Database SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -32,7 +37,7 @@
 </head>
 <body class="min-h-full flex flex-col justify-between text-slate-800 pb-12 bg-slate-900">
 
-    <!-- Header / Vibrant Lottery Ticket Header Banner -->
+    <!-- Header -->
     <header class="lottery-gradient text-white py-5 px-4 shadow-xl border-b-4 border-amber-400 relative overflow-hidden">
         <div class="absolute -top-3 -left-3 text-amber-400/20 text-5xl"><i class="fa-solid fa-star"></i></div>
         <div class="absolute top-2 -right-2 text-yellow-300/20 text-6xl"><i class="fa-solid fa-ticket"></i></div>
@@ -43,8 +48,13 @@
                     <i class="fa-solid fa-ticket-simple text-2xl"></i>
                 </div>
                 <div>
-                    <span class="bg-amber-400/20 text-amber-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border border-amber-400/30 tracking-widest">Official Portal</span>
-                    <h1 class="font-lottery font-black text-xl sm:text-2xl gold-gradient-text tracking-wide drop-shadow-md">
+                    <div class="flex items-center gap-1.5">
+                        <span class="bg-amber-400/20 text-amber-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border border-amber-400/30 tracking-widest">Official Portal</span>
+                        <span id="cloudStatusBadge" class="bg-slate-800 text-slate-300 text-[9px] font-bold px-2 py-0.5 rounded-full border border-slate-600">
+                            <i class="fa-solid fa-circle text-[7px] text-amber-400 mr-1"></i>Connecting...
+                        </span>
+                    </div>
+                    <h1 class="font-lottery font-black text-xl sm:text-2xl gold-gradient-text tracking-wide drop-shadow-md mt-0.5">
                         MAHASHA EVENING LOTTERY
                     </h1>
                     <p class="text-xs text-indigo-200 font-semibold tracking-wider uppercase -mt-1">
@@ -85,12 +95,12 @@
                 </div>
                 <div class="text-right bg-amber-400/10 border border-amber-400/40 p-2.5 rounded-xl">
                     <p class="text-[10px] text-amber-300 uppercase font-bold tracking-wider">Fixed Ticket Price</p>
-                    <p class="text-2xl font-black text-amber-400 font-lottery">₹<span id="displayAmount">100</span></p>
+                    <p class="text-2xl font-black text-amber-400 font-lottery">₹<span id="displayAmount">10</span></p>
                 </div>
             </div>
-            <div class="pt-2 flex justify-between items-center text-[11px] text-indigo-200">
+            <div class="pt-2 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 text-[11px] text-indigo-200">
                 <span><i class="fa-solid fa-shield-halved text-emerald-400 mr-1"></i>Secure UTR Verification</span>
-                <span class="text-amber-300 font-semibold" id="autoScheduleBadge"><i class="fa-solid fa-clock mr-1"></i>Pause 20:00 - 08:00</span>
+                <span class="text-amber-300 font-semibold" id="autoScheduleBadge"><i class="fa-solid fa-calendar-check mr-1"></i>Schedule Active</span>
             </div>
         </div>
 
@@ -103,21 +113,17 @@
                 <span class="text-xs bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full font-bold">Step 1 of 1</span>
             </h2>
 
-            <!-- Form -->
             <form id="paymentForm" onsubmit="handlePayment(event)" class="space-y-3.5">
-                
-                <!-- Display Only Amount Box -->
                 <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex justify-between items-center">
                     <div>
                         <span class="block text-xs font-semibold text-slate-500">Payable Amount</span>
                         <span class="text-xs text-slate-400">Non-editable ticket fee</span>
                     </div>
                     <div class="text-xl font-extrabold text-slate-800">
-                        ₹<span id="formAmountDisplay">100</span>
+                        ₹<span id="formAmountDisplay">10</span>
                     </div>
                 </div>
 
-                <!-- Payer Name -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Full Name <span class="text-rose-500">*</span></label>
                     <div class="relative">
@@ -127,7 +133,6 @@
                     </div>
                 </div>
 
-                <!-- Payer Mobile Number -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">10-digit Mobile Number <span class="text-rose-500">*</span></label>
                     <div class="relative">
@@ -137,7 +142,6 @@
                     </div>
                 </div>
 
-                <!-- UTR / UPI Reference Number -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">12-Digit UTR / UPI Reference No <span class="text-rose-500">*</span></label>
                     <div class="relative">
@@ -148,7 +152,6 @@
                     <p class="text-[10px] text-slate-400 mt-1">Payment karne ke baad UPI app se 12-digit UTR/Ref number yahan dalein.</p>
                 </div>
 
-                <!-- Pay Buttons -->
                 <div class="pt-2 space-y-2">
                     <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-lg hover:shadow-xl transition transform active:scale-98 flex items-center justify-center gap-2 text-base">
                         <i class="fa-solid fa-bolt text-yellow-300 text-lg"></i> SUBMIT & VERIFY TICKET
@@ -161,30 +164,41 @@
             </form>
         </div>
 
-        <!-- QR Code Modal / Drawer -->
+        <!-- QR Code Drawer -->
         <div id="qrSection" class="hidden bg-white rounded-2xl p-5 shadow-lg border border-slate-100 text-center space-y-3 transition-all duration-300">
             <h3 class="font-bold text-sm text-slate-700">Scan QR Code to Pay</h3>
             <div id="qrcode" class="flex justify-center p-3 bg-slate-50 rounded-xl border border-slate-200 w-fit mx-auto"></div>
-            <p id="qrAmountText" class="text-xs font-bold text-emerald-600">Amount: ₹100</p>
+            <p id="qrAmountText" class="text-xs font-bold text-emerald-600">Amount: ₹10</p>
             <p class="text-[11px] text-slate-400">Google Pay, Paytm ya PhonePe se scan karke payment karein aur UTR number note kar lein.</p>
             <button onclick="document.getElementById('qrSection').classList.add('hidden')" class="text-xs text-rose-500 hover:underline font-medium pt-1">Close QR Code</button>
         </div>
 
-        <!-- Payment Log & History Section -->
+        <!-- Total Collection & Payment History Section -->
         <div class="bg-white rounded-2xl p-4 shadow-md border border-slate-100 space-y-3">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+            
+            <!-- Total Collected Amount Summary Banner -->
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-xl p-3.5 shadow-sm flex justify-between items-center">
                 <div>
-                    <h2 class="text-sm font-bold text-slate-800">Verified Payment Records</h2>
-                    <p class="text-[11px] text-slate-400">Successfully verified transaction logs</p>
+                    <p class="text-[10px] uppercase tracking-wider text-emerald-100 font-bold">Total Collected Amount</p>
+                    <p class="text-2xl font-black font-lottery tracking-tight">₹<span id="totalCollectedDisplay">0.00</span></p>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="exportToCSV()" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-2xs">
-                        <i class="fa-solid fa-file-excel"></i> Export Excel
-                    </button>
+                <div class="text-right bg-white/15 px-3 py-1.5 rounded-lg border border-white/20">
+                    <p class="text-[10px] text-emerald-100 font-semibold">Total Tickets</p>
+                    <p class="text-lg font-extrabold" id="totalTicketsDisplay">0</p>
                 </div>
             </div>
 
-            <!-- Transaction Table Container -->
+            <div class="flex justify-between items-center border-b border-slate-100 pb-2 pt-1">
+                <div>
+                    <h2 class="text-sm font-bold text-slate-800">Verified Payment Records</h2>
+                    <p class="text-[11px] text-slate-400">Live synced transaction logs</p>
+                </div>
+                <button onclick="exportToCSV()" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                    <i class="fa-solid fa-file-excel"></i> Export Excel
+                </button>
+            </div>
+
+            <!-- Transaction Table -->
             <div class="overflow-x-auto max-h-64 scrollbar-thin">
                 <table class="w-full text-left text-xs border-collapse">
                     <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider text-[10px] sticky top-0">
@@ -196,9 +210,7 @@
                             <th class="p-2 border-b">Amount</th>
                         </tr>
                     </thead>
-                    <tbody id="logsTableBody" class="divide-y divide-slate-100 text-slate-700">
-                        <!-- Dynamic Records Rendered Here -->
-                    </tbody>
+                    <tbody id="logsTableBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
                 </table>
             </div>
             
@@ -209,7 +221,7 @@
         </div>
     </main>
 
-    <!-- SHOW RESULT SCROLLING VIEW MODAL (Railgadi Style Continuous Upward Scroll) -->
+    <!-- SHOW RESULT SCROLLING VIEW MODAL -->
     <div id="resultViewModal" class="fixed inset-0 bg-slate-950 z-50 hidden flex flex-col justify-between overflow-hidden">
         <!-- Top Controls Bar -->
         <div class="bg-indigo-950/90 text-white p-4 flex justify-between items-center border-b border-amber-400/40 z-20 shadow-lg">
@@ -217,14 +229,14 @@
                 <i class="fa-solid fa-trophy text-amber-400 text-xl"></i>
                 <div>
                     <h2 class="font-lottery font-extrabold text-amber-300 text-base leading-tight">LIVE LOTTERY RESULT</h2>
-                    <p class="text-[10px] text-slate-300" id="resultStatusText">Status: IST Auto-Schedule Running</p>
+                    <p class="text-[10px] text-emerald-400 font-bold" id="resultStatusText">Status: Live Draw Running</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <!-- Speed Button -->
+                <!-- Global Speed Button -->
                 <button onclick="cycleScrollSpeed()" class="bg-amber-400 hover:bg-amber-300 text-indigo-950 font-black px-3 py-1.5 rounded-xl text-xs shadow-lg flex items-center gap-1 transition active:scale-90">
                     <i class="fa-solid fa-gauge-high"></i>
-                    <span>Speed: <span id="speedMultiplier">1x</span></span>
+                    <span>Speed: <span id="speedMultiplier">3x</span></span>
                 </button>
                 <button onclick="closeResultView()" class="bg-slate-800 text-slate-300 hover:text-white p-2 rounded-xl text-xs">
                     <i class="fa-solid fa-xmark text-lg"></i>
@@ -232,9 +244,8 @@
             </div>
         </div>
 
-        <!-- Scrolling Canvas Viewport with Left Arrow Marker -->
+        <!-- Scrolling Viewport -->
         <div class="relative flex-1 bg-slate-900 overflow-hidden flex items-center justify-center">
-            
             <!-- LEFT-MIDDLE WINNER ARROW MARKER -->
             <div class="absolute left-1 top-1/2 -translate-y-1/2 z-30 flex items-center pointer-events-none drop-shadow-[0_0_12px_rgba(239,68,68,0.9)]">
                 <div class="bg-rose-600 text-white font-extrabold text-[10px] uppercase px-2 py-1 rounded-l-md tracking-wider border-y border-l border-rose-400">
@@ -249,18 +260,16 @@
                 <span class="text-[10px] font-mono text-amber-300/40">RESULT POINTER LINE</span>
             </div>
 
-            <!-- Auto Scrolling Railgadi Style Box -->
+            <!-- Auto Scrolling Box -->
             <div id="scrollContainer" class="w-full max-w-md h-full overflow-hidden relative">
-                <div id="scrollContent" class="absolute top-0 left-0 w-full will-change-transform">
-                    <!-- Dynamic scrolling ticket cards inserted here -->
-                </div>
+                <div id="scrollContent" class="absolute top-0 left-0 w-full will-change-transform"></div>
             </div>
         </div>
 
-        <!-- Bottom Footer info bar -->
+        <!-- Bottom Footer -->
         <div class="bg-indigo-950 p-3 text-center border-t border-indigo-900 text-[11px] text-slate-300 flex justify-between items-center z-20">
             <span class="flex items-center gap-1 text-amber-300 font-medium">
-                <i class="fa-solid fa-bullhorn"></i> Official Mahasha Lottery Winner Picker
+                <i class="fa-solid fa-bullhorn"></i> Official Mahasha Lottery Picker
             </span>
             <span id="currentTimeDisplay" class="font-mono text-slate-400">00:00:00 IST</span>
         </div>
@@ -278,7 +287,7 @@
                 </button>
             </div>
             <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Password (Default: 1234)</label>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
                 <input type="password" id="adminPasswordInput" placeholder="Enter password" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 font-mono">
             </div>
             <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
@@ -303,7 +312,7 @@
             <div class="space-y-3">
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Set Ticket Payable Amount (₹)</label>
-                    <input type="number" min="1" step="any" id="configAmount" value="100" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold text-indigo-900 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <input type="number" min="1" step="any" id="configAmount" value="10" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold text-indigo-900 focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Target UPI Address</label>
@@ -314,20 +323,23 @@
                     <input type="text" id="configPayeeName" value="Mahasha Evening Lottery" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
 
-                <div class="border-t border-slate-100 pt-2">
-                    <label class="block text-xs font-bold text-indigo-950 mb-1 flex items-center gap-1">
-                        <i class="fa-solid fa-clock-rotate-left text-amber-500"></i> Auto-Pause Schedule (IST Hours)
+                <!-- Date + Time Draw / Pause Schedule -->
+                <div class="border-t border-slate-100 pt-2 space-y-2">
+                    <label class="block text-xs font-bold text-indigo-950 flex items-center gap-1">
+                        <i class="fa-solid fa-calendar-days text-amber-500"></i> Draw Stop / Auto-Pause Schedule (Date & Time)
                     </label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <span class="text-[10px] text-slate-500 font-medium">Pause Start (24h)</span>
-                            <input type="number" min="0" max="23" id="configPauseStart" value="20" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold">
-                        </div>
-                        <div>
-                            <span class="text-[10px] text-slate-500 font-medium">Pause End (24h)</span>
-                            <input type="number" min="0" max="23" id="configPauseEnd" value="8" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold">
-                        </div>
+                    <p class="text-[10px] text-slate-500">Is Date & Time ke beech result scrolling ruk jayegi (jaise Sunday Draw ke liye):</p>
+                    <div>
+                        <span class="text-[10px] text-slate-600 font-semibold block mb-0.5">Stop / Pause Start (Date & Time)</span>
+                        <input type="datetime-local" id="configPauseStartDT" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
                     </div>
+                    <div>
+                        <span class="text-[10px] text-slate-600 font-semibold block mb-0.5">Resume / Pause End (Date & Time)</span>
+                        <input type="datetime-local" id="configPauseEndDT" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700">
+                    </div>
+                    <button type="button" onclick="clearScheduleDates()" class="text-[10px] text-indigo-600 hover:underline font-semibold">
+                        Clear Schedule (Hamesha Chalu Rakhein)
+                    </button>
                 </div>
 
                 <div class="border-t border-slate-100 pt-2">
@@ -352,56 +364,132 @@
 
     <!-- JavaScript Logic -->
     <script>
-        // System Configuration State
+        // ==========================================
+        // FIREBASE CLOUD CONFIGURATION (Integrated)
+        // ==========================================
+        const firebaseConfig = {
+            databaseURL: "https://mahasha-lottery-default-rtdb.firebaseio.com"
+        };
+
+        let db = null;
+        let isCloudActive = false;
+
+        try {
+            if (firebaseConfig.databaseURL) {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                isCloudActive = true;
+            }
+        } catch (e) {
+            console.warn("Firebase fallback to local mode:", e);
+        }
+
+        // System State
         let upiConfig = {
             upiId: "amritsarzone1-1@oksbi",
             payeeName: "Mahasha Evening Lottery",
-            amount: "100",
-            pauseStart: 20, // 8:00 PM IST
-            pauseEnd: 8,    // 8:00 AM IST
+            amount: "10",
+            pauseStartDT: "",
+            pauseEndDT: "",
             adminPass: "1234"
         };
 
-        // Scroll Control Variables
+        let allRecords = [];
         let scrollAnimationId = null;
         let scrollYPos = 0;
         let singleLoopHeight = 0;
         let currentSpeedStep = 0;
-        const speedOptions = [1, 2, 4, 5]; // Speed multipliers
+        // Updated Speed Options (3x faster base speed and progressive multipliers)
+        const speedOptions = [3, 6, 9, 12, 15];
         let isAutoPaused = false;
 
-        // Load saved state on Initialization
+        // Initialize App
         window.onload = function() {
-            const savedConfig = localStorage.getItem('mahasha_upi_config');
-            if (savedConfig) {
-                upiConfig = JSON.parse(savedConfig);
+            const badge = document.getElementById('cloudStatusBadge');
+            if (isCloudActive) {
+                badge.innerHTML = `<i class="fa-solid fa-circle text-[7px] text-emerald-400 mr-1 animate-pulse"></i>Cloud Live`;
+                initCloudListeners();
+            } else {
+                badge.innerHTML = `<i class="fa-solid fa-circle text-[7px] text-amber-400 mr-1"></i>Local Mode`;
+                const savedConfig = localStorage.getItem('mahasha_upi_config');
+                if (savedConfig) upiConfig = JSON.parse(savedConfig);
+                allRecords = JSON.parse(localStorage.getItem('mahasha_payment_logs') || '[]');
+                currentSpeedStep = parseInt(localStorage.getItem('mahasha_scroll_speed') || '0', 10);
+                
+                updateConfigUI();
+                renderLogs();
+                updateSpeedUI();
             }
-            updateConfigUI();
-            renderLogs();
-            setInterval(updateISTClock, 1000);
+
+            setInterval(updateISTClockAndSchedule, 1000);
         };
 
-        // Update UI Elements with current config
+        // Firebase Realtime Listeners (Syncs Config, Records, and Speed across all users)
+        function initCloudListeners() {
+            // 1. Sync Admin Config
+            db.ref('lottery/config').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    upiConfig = { ...upiConfig, ...data };
+                    updateConfigUI();
+                } else {
+                    db.ref('lottery/config').set(upiConfig);
+                }
+            });
+
+            // 2. Sync Payment Records
+            db.ref('lottery/records').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    allRecords = Object.values(data).sort((a, b) => b.id - a.id);
+                } else {
+                    allRecords = [];
+                }
+                renderLogs();
+                if (!document.getElementById('resultViewModal').classList.contains('hidden')) {
+                    renderResultCards();
+                }
+            });
+
+            // 3. Sync Global Scroll Speed across all users
+            db.ref('lottery/scrollSpeedStep').on('value', (snapshot) => {
+                const step = snapshot.val();
+                if (step !== null && step !== undefined) {
+                    currentSpeedStep = step % speedOptions.length;
+                    updateSpeedUI();
+                }
+            });
+        }
+
+        // Update UI Elements
         function updateConfigUI() {
             document.getElementById('displayUpiId').innerText = upiConfig.upiId;
             document.getElementById('displayPayeeName').innerText = upiConfig.payeeName;
             document.getElementById('displayAmount').innerText = upiConfig.amount;
             document.getElementById('formAmountDisplay').innerText = upiConfig.amount;
 
-            // Update Admin Modal inputs
             document.getElementById('configUpiId').value = upiConfig.upiId;
             document.getElementById('configPayeeName').value = upiConfig.payeeName;
             document.getElementById('configAmount').value = upiConfig.amount;
-            document.getElementById('configPauseStart').value = upiConfig.pauseStart !== undefined ? upiConfig.pauseStart : 20;
-            document.getElementById('configPauseEnd').value = upiConfig.pauseEnd !== undefined ? upiConfig.pauseEnd : 8;
+            document.getElementById('configPauseStartDT').value = upiConfig.pauseStartDT || '';
+            document.getElementById('configPauseEndDT').value = upiConfig.pauseEndDT || '';
             document.getElementById('configNewPassword').value = '';
 
-            const pStartFormatted = String(upiConfig.pauseStart || 20).padStart(2, '0') + ":00";
-            const pEndFormatted = String(upiConfig.pauseEnd || 8).padStart(2, '0') + ":00";
-            document.getElementById('autoScheduleBadge').innerHTML = `<i class="fa-solid fa-clock mr-1"></i>Pause ${pStartFormatted} - ${pEndFormatted} IST`;
+            const schedBadge = document.getElementById('autoScheduleBadge');
+            if (upiConfig.pauseStartDT && upiConfig.pauseEndDT) {
+                const startFmt = new Date(upiConfig.pauseStartDT).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+                schedBadge.innerHTML = `<i class="fa-solid fa-calendar-check mr-1"></i>Stop: ${startFmt}`;
+            } else {
+                schedBadge.innerHTML = `<i class="fa-solid fa-play-circle mr-1"></i>24x7 Continuous Draw`;
+            }
         }
 
-        // Password Prompt Handling
+        function updateSpeedUI() {
+            const newSpeed = speedOptions[currentSpeedStep] || 3;
+            document.getElementById('speedMultiplier').innerText = `${newSpeed}x`;
+        }
+
+        // Password Modal
         function promptAdminPassword() {
             document.getElementById('adminPasswordInput').value = '';
             document.getElementById('passwordModal').classList.remove('hidden');
@@ -414,7 +502,6 @@
         function verifyAdminPassword() {
             const entered = document.getElementById('adminPasswordInput').value;
             const correctPass = upiConfig.adminPass || "1234";
-
             if (entered === correctPass) {
                 closePasswordModal();
                 toggleAdminModal();
@@ -423,17 +510,25 @@
             }
         }
 
-        // Toggle Admin Modal
         function toggleAdminModal() {
-            const modal = document.getElementById('adminModal');
-            modal.classList.toggle('hidden');
+            document.getElementById('adminModal').classList.toggle('hidden');
         }
 
-        // Admin Clear All Records with confirmation prompt
+        function clearScheduleDates() {
+            document.getElementById('configPauseStartDT').value = '';
+            document.getElementById('configPauseEndDT').value = '';
+        }
+
+        // Clear All Records
         function adminClearAllRecords() {
             if (confirm("Are you sure you want to delete all records?")) {
-                localStorage.removeItem('mahasha_payment_logs');
-                renderLogs();
+                if (isCloudActive) {
+                    db.ref('lottery/records').remove();
+                } else {
+                    allRecords = [];
+                    localStorage.removeItem('mahasha_payment_logs');
+                    renderLogs();
+                }
                 toggleAdminModal();
                 showToast("Sabhi records safalta se delete kar diye gaye hain.", "info");
             }
@@ -444,8 +539,8 @@
             const newUpi = document.getElementById('configUpiId').value.trim();
             const newName = document.getElementById('configPayeeName').value.trim();
             const newAmt = document.getElementById('configAmount').value.trim();
-            const pStart = parseInt(document.getElementById('configPauseStart').value, 10);
-            const pEnd = parseInt(document.getElementById('configPauseEnd').value, 10);
+            const pStartDT = document.getElementById('configPauseStartDT').value;
+            const pEndDT = document.getElementById('configPauseEndDT').value;
             const newPass = document.getElementById('configNewPassword').value.trim();
 
             if (!newUpi || !newAmt || newAmt <= 0) {
@@ -456,34 +551,35 @@
             upiConfig.upiId = newUpi;
             upiConfig.payeeName = newName || "Mahasha Evening Lottery";
             upiConfig.amount = newAmt;
-            upiConfig.pauseStart = isNaN(pStart) ? 20 : pStart;
-            upiConfig.pauseEnd = isNaN(pEnd) ? 8 : pEnd;
+            upiConfig.pauseStartDT = pStartDT;
+            upiConfig.pauseEndDT = pEndDT;
             if (newPass) {
                 upiConfig.adminPass = newPass;
             }
-            
-            localStorage.setItem('mahasha_upi_config', JSON.stringify(upiConfig));
-            updateConfigUI();
+
+            if (isCloudActive) {
+                db.ref('lottery/config').set(upiConfig);
+            } else {
+                localStorage.setItem('mahasha_upi_config', JSON.stringify(upiConfig));
+                updateConfigUI();
+            }
+
             toggleAdminModal();
             showToast("Admin Settings update ho gayi!", "success");
         }
 
-        // Build UPI Intent URI
         function getUpiURI(amount) {
             const pa = encodeURIComponent(upiConfig.upiId);
             const pn = encodeURIComponent(upiConfig.payeeName);
             const am = encodeURIComponent(parseFloat(amount).toFixed(2));
-            const cu = "INR";
-            return `upi://pay?pa=${pa}&pn=${pn}&am=${am}&cu=${cu}`;
+            return `upi://pay?pa=${pa}&pn=${pn}&am=${am}&cu=INR`;
         }
 
-        // Generate Ticket Number (MEL-XXXXXX)
         function generateTicketNumber() {
-            const randomNum = Math.floor(100000 + Math.random() * 900000);
-            return `MEL-${randomNum}`;
+            return `MEL-${Math.floor(100000 + Math.random() * 900000)}`;
         }
 
-        // Handle Payment Submit with Mandatory UTR Verification
+        // Handle Payment Submit
         function handlePayment(event) {
             event.preventDefault();
 
@@ -491,11 +587,6 @@
             const mobile = document.getElementById('payerMobile').value;
             const name = document.getElementById('payerName').value;
             const utr = document.getElementById('payerUtr').value.trim();
-
-            if (!amount || amount <= 0) {
-                showToast("Invalid ticket amount!", "error");
-                return;
-            }
 
             if (mobile.length !== 10) {
                 showToast("Kripya 10-digit mobile number enter karein!", "error");
@@ -507,25 +598,16 @@
                 return;
             }
 
+            // Duplicate UTR Check
+            if (allRecords.some(r => r.utr === utr)) {
+                showToast("Yeh UTR number pehle se register ho chuka hai!", "error");
+                return;
+            }
+
             const ticketNo = generateTicketNumber();
-
-            // Record Log entry with verified UTR
-            logTransaction(amount, mobile, name, ticketNo, utr);
-
-            showToast(`Ticket ${ticketNo} Verified & Saved Successfully!`, "success");
-
-            // Clear Form inputs after successful submission
-            document.getElementById('paymentForm').reset();
-            document.getElementById('formAmountDisplay').innerText = upiConfig.amount;
-        }
-
-        // Log Transaction to LocalStorage with UTR
-        function logTransaction(amount, mobile, name, ticketNo, utr) {
-            const records = JSON.parse(localStorage.getItem('mahasha_payment_logs') || '[]');
-            
             const newRecord = {
                 id: Date.now(),
-                ticketNo: ticketNo || generateTicketNumber(),
+                ticketNo: ticketNo,
                 timestamp: new Date().toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' }),
                 amount: parseFloat(amount).toFixed(2),
                 mobile: mobile,
@@ -534,32 +616,47 @@
                 targetUpi: upiConfig.upiId
             };
 
-            records.unshift(newRecord); // Add at top
-            localStorage.setItem('mahasha_payment_logs', JSON.stringify(records));
-            renderLogs();
+            if (isCloudActive) {
+                db.ref('lottery/records/' + newRecord.id).set(newRecord);
+            } else {
+                allRecords.unshift(newRecord);
+                localStorage.setItem('mahasha_payment_logs', JSON.stringify(allRecords));
+                renderLogs();
+            }
+
+            showToast(`Ticket ${ticketNo} Verified & Saved Successfully!`, "success");
+            document.getElementById('paymentForm').reset();
+            document.getElementById('formAmountDisplay').innerText = upiConfig.amount;
         }
 
-        // Render Logs Table with UTR Column
+        // Render Logs & Total Collected Amount
         function renderLogs() {
-            const records = JSON.parse(localStorage.getItem('mahasha_payment_logs') || '[]');
             const tableBody = document.getElementById('logsTableBody');
             const noRecordsMsg = document.getElementById('noRecordsMsg');
-
             tableBody.innerHTML = '';
 
-            if (records.length === 0) {
+            // Calculate Total Collected Amount
+            let totalAmount = 0;
+            allRecords.forEach(item => {
+                totalAmount += parseFloat(item.amount || 0);
+            });
+
+            document.getElementById('totalCollectedDisplay').innerText = totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('totalTicketsDisplay').innerText = allRecords.length;
+
+            if (allRecords.length === 0) {
                 noRecordsMsg.classList.remove('hidden');
                 return;
             }
 
             noRecordsMsg.classList.add('hidden');
 
-            records.forEach(item => {
+            allRecords.forEach(item => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50 transition';
                 tr.innerHTML = `
-                    <td class="p-2 border-b font-mono font-bold text-indigo-700">${item.ticketNo || 'MEL-000000'}</td>
-                    <td class="p-2 border-b font-mono text-slate-600 font-semibold">${item.utr || 'N/A'}</td>
+                    <td class="p-2 border-b font-mono font-bold text-indigo-700">${item.ticketNo}</td>
+                    <td class="p-2 border-b font-mono text-slate-600 font-semibold">${item.utr}</td>
                     <td class="p-2 border-b font-semibold text-slate-800">${item.name}</td>
                     <td class="p-2 border-b text-slate-600">${item.mobile}</td>
                     <td class="p-2 border-b font-bold text-emerald-600">₹${item.amount}</td>
@@ -568,7 +665,7 @@
             });
         }
 
-        // RESULTS RAILGADI STYLE SCROLLING LOGIC (100% Seamless Infinite Upward Loop)
+        // RESULT SCROLLING VIEW
         function openResultView() {
             document.getElementById('resultViewModal').classList.remove('hidden');
             renderResultCards();
@@ -577,53 +674,51 @@
 
         function closeResultView() {
             document.getElementById('resultViewModal').classList.add('hidden');
-            if (scrollAnimationId) {
-                cancelAnimationFrame(scrollAnimationId);
-            }
+            if (scrollAnimationId) cancelAnimationFrame(scrollAnimationId);
         }
 
+        // Global Speed Cycle (Updates Cloud for ALL users!)
         function cycleScrollSpeed() {
             currentSpeedStep = (currentSpeedStep + 1) % speedOptions.length;
             const newSpeed = speedOptions[currentSpeedStep];
-            document.getElementById('speedMultiplier').innerText = `${newSpeed}x`;
-            showToast(`Speed set to ${newSpeed}x`, "info");
+            updateSpeedUI();
+
+            if (isCloudActive) {
+                db.ref('lottery/scrollSpeedStep').set(currentSpeedStep);
+                showToast(`Global Speed set to ${newSpeed}x for all users!`, "info");
+            } else {
+                localStorage.setItem('mahasha_scroll_speed', currentSpeedStep);
+                showToast(`Speed set to ${newSpeed}x`, "info");
+            }
         }
 
         function renderResultCards() {
-            const records = JSON.parse(localStorage.getItem('mahasha_payment_logs') || '[]');
             const container = document.getElementById('scrollContent');
             container.innerHTML = '';
 
             let baseHTML = '';
-            if (records.length === 0) {
+            if (allRecords.length === 0) {
                 baseHTML = `
                     <div class="pb-3 px-4">
                         <div class="p-4 bg-slate-800/90 border border-slate-700 rounded-2xl shadow-lg text-center">
                             <span class="text-xs font-mono text-amber-400 font-bold">MEL-548021 | UTR: 402918237102</span>
-                            <h4 class="text-lg font-black text-white mt-0.5">5480 - 1st Prize</h4>
-                            <p class="text-xs text-indigo-300 font-medium">Dummi-Record1- 9876543210</p>
+                            <h4 class="text-lg font-black text-white mt-0.5">5480 - Demo Ticket</h4>
+                            <p class="text-xs text-indigo-300 font-medium">Rakesh - 9876543210</p>
                         </div>
                     </div>
                     <div class="pb-3 px-4">
                         <div class="p-4 bg-slate-800/90 border border-slate-700 rounded-2xl shadow-lg text-center">
                             <span class="text-xs font-mono text-amber-400 font-bold">MEL-123456 | UTR: 309281746591</span>
-                            <h4 class="text-lg font-black text-white mt-0.5">1234 - 2nd Prize</h4>
-                            <p class="text-xs text-indigo-300 font-medium">Dummi-Record2 - 9123456789</p>
-                        </div>
-                    </div>
-                    <div class="pb-3 px-4">
-                        <div class="p-4 bg-slate-800/90 border border-slate-700 rounded-2xl shadow-lg text-center">
-                            <span class="text-xs font-mono text-amber-400 font-bold">MEL-987654 | UTR: 501928374650</span>
-                            <h4 class="text-lg font-black text-white mt-0.5">9876 - Lucky No</h4>
-                            <p class="text-xs text-indigo-300 font-medium">Dummi-Record2 - 9988776655</p>
+                            <h4 class="text-lg font-black text-white mt-0.5">1234 - Demo Ticket</h4>
+                            <p class="text-xs text-indigo-300 font-medium">Sahil - 9123456789</p>
                         </div>
                     </div>
                 `;
             } else {
-                records.forEach(item => {
+                allRecords.forEach(item => {
                     baseHTML += `
                         <div class="pb-3 px-4">
-                            <div class="p-4 bg-slate-800/90 border border-slate-700 rounded-2xl shadow-lg text-center">
+                            <div class="p-4 bg-slate-800/90 border border-amber-400/30 rounded-2xl shadow-lg text-center">
                                 <span class="text-xs font-mono text-amber-400 font-bold">${item.ticketNo} | UTR: ${item.utr}</span>
                                 <h4 class="text-lg font-black text-white mt-0.5">${item.name}</h4>
                                 <p class="text-xs text-indigo-300 font-medium">Mobile: ${item.mobile} | Paid: ₹${item.amount}</p>
@@ -633,11 +728,8 @@
                 });
             }
 
-            // Pehle ek baar daal kar uski asli height naap lete hain
             container.innerHTML = baseHTML;
             const baseHeight = container.offsetHeight;
-
-            // Agar records kam hain (screen se chhote hain), to pehle ek single loop ko screen se bada banayein
             const viewportHeight = document.getElementById('scrollContainer').offsetHeight || 800;
             let repeatCount = 1;
             if (baseHeight > 0 && baseHeight < viewportHeight * 1.5) {
@@ -645,8 +737,6 @@
             }
 
             const singleSetHTML = baseHTML.repeat(repeatCount);
-            
-            // Ab exact 2 sets daalte hain taaki aadha hissa cross hone par 100% invisible reset ho
             container.innerHTML = singleSetHTML + singleSetHTML;
             singleLoopHeight = container.offsetHeight / 2;
         }
@@ -657,47 +747,32 @@
             const container = document.getElementById('scrollContent');
 
             function step() {
-                if (singleLoopHeight > 0) {
+                if (singleLoopHeight > 0 && !isAutoPaused) {
                     const speed = speedOptions[currentSpeedStep] * 0.8;
                     scrollYPos += speed;
-
-                    // Modulo (%) ka istemal karne se jab bhi 1 set poora guzarta hai, bacha hua pixel aage chalta rehta hai, koi jhatka nahi lagta
                     if (scrollYPos >= singleLoopHeight) {
                         scrollYPos = scrollYPos % singleLoopHeight;
                     }
-
                     container.style.transform = `translate3d(0, -${scrollYPos}px, 0)`;
                 }
                 scrollAnimationId = requestAnimationFrame(step);
             }
-
             scrollAnimationId = requestAnimationFrame(step);
         }
 
-        // IST Clock and Auto-Pause Schedule verification
-        function updateISTClock() {
+        // Date & Time Schedule Verification
+        function updateISTClockAndSchedule() {
             const now = new Date();
-            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-            const istTime = new Date(utc + (3600000 * 5.5));
-            
-            const hours = istTime.getHours();
-            const minutes = istTime.getMinutes();
-            const seconds = istTime.getSeconds();
-
-            const timeStr = String(hours).padStart(2,'0') + ":" + String(minutes).padStart(2,'0') + ":" + String(seconds).padStart(2,'0') + " IST";
+            const timeStr = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false }) + " IST";
             const clockEl = document.getElementById('currentTimeDisplay');
-            if(clockEl) clockEl.innerText = timeStr;
-
-            const pStart = upiConfig.pauseStart !== undefined ? upiConfig.pauseStart : 20;
-            const pEnd = upiConfig.pauseEnd !== undefined ? upiConfig.pauseEnd : 8;
+            if (clockEl) clockEl.innerText = timeStr;
 
             let paused = false;
-            if (pStart > pEnd) {
-                if (hours >= pStart || hours < pEnd) {
-                    paused = true;
-                }
-            } else {
-                if (hours >= pStart && hours < pEnd) {
+            if (upiConfig.pauseStartDT && upiConfig.pauseEndDT) {
+                const startMs = new Date(upiConfig.pauseStartDT).getTime();
+                const endMs = new Date(upiConfig.pauseEndDT).getTime();
+                const nowMs = now.getTime();
+                if (nowMs >= startMs && nowMs <= endMs) {
                     paused = true;
                 }
             }
@@ -706,8 +781,8 @@
             const statusText = document.getElementById('resultStatusText');
             if (statusText) {
                 if (paused) {
-                    statusText.innerText = "Status: Auto-Paused (Night Schedule Active)";
-                    statusText.className = "text-[10px] text-amber-400 font-bold";
+                    statusText.innerText = "Status: DRAW PAUSED (Winner Locked at Pointer)";
+                    statusText.className = "text-[10px] text-rose-400 font-extrabold animate-pulse";
                 } else {
                     statusText.innerText = "Status: Live Draw Running";
                     statusText.className = "text-[10px] text-emerald-400 font-bold";
@@ -715,7 +790,6 @@
             }
         }
 
-        // Utility Toast Message
         function showToast(message, type = "success") {
             const toast = document.getElementById('toast');
             toast.innerText = message;
@@ -723,27 +797,20 @@
                 type === 'error' ? 'bg-rose-500 text-white' : type === 'info' ? 'bg-indigo-500 text-white' : 'bg-emerald-500 text-white'
             }`;
             toast.classList.remove('hidden');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 3000);
+            setTimeout(() => toast.classList.add('hidden'), 3000);
         }
 
-        // Export to CSV / Excel
         function exportToCSV() {
-            const records = JSON.parse(localStorage.getItem('mahasha_payment_logs') || '[]');
-            if (records.length === 0) {
+            if (allRecords.length === 0) {
                 showToast("Export karne ke liye koi record nahi hai!", "error");
                 return;
             }
-
             let csvContent = "data:text/csv;charset=utf-8,Ticket Number,UTR Number,Timestamp,Name,Mobile,Amount,UPI ID\r\n";
-            records.forEach(row => {
+            allRecords.forEach(row => {
                 csvContent += `"${row.ticketNo}","${row.utr}","${row.timestamp}","${row.name}","${row.mobile}","${row.amount}","${row.targetUpi}"\r\n`;
             });
-
-            const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
+            link.setAttribute("href", encodeURI(csvContent));
             link.setAttribute("download", "Mahasha_Lottery_Records.csv");
             document.body.appendChild(link);
             link.click();
@@ -751,25 +818,21 @@
             showToast("Excel file download ho gayi hai!", "success");
         }
 
-        // QR Code Generator Function
         function generateAndShowQR() {
             const amount = upiConfig.amount;
             const qrSection = document.getElementById('qrSection');
             const qrcodeContainer = document.getElementById('qrcode');
-            
             qrcodeContainer.innerHTML = "";
-            const upiString = getUpiURI(amount);
-
             new QRCode(qrcodeContainer, {
-                text: upiString,
+                text: getUpiURI(amount),
                 width: 160,
                 height: 160,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
             });
-
             document.getElementById('qrAmountText').innerText = `Amount: ₹${amount}`;
+            qrSection.classList.add('block');
             qrSection.classList.remove('hidden');
         }
     </script>
