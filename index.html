@@ -329,20 +329,31 @@
                     <input type="text" id="configPayeeName" value="Mahasha Evening Lottery" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
 
-                <!-- Stop Time Pause Schedule (Mobile Optimized Date & Time) -->
+                <!-- Stop Time Pause Schedule (Custom Mobile-Friendly Picker) -->
                 <div class="border-t border-slate-100 pt-2 space-y-2">
                     <label class="block text-xs font-bold text-indigo-950 flex items-center gap-1">
                         <i class="fa-solid fa-calendar-days text-amber-500"></i> Pause Stop Schedule (Date Range)
                     </label>
                     <p class="text-[10px] text-slate-500">Pehli date se dusri date tak draw rukha rahega:</p>
+                    
                     <div>
                         <span class="text-[10px] text-slate-600 font-semibold block mb-0.5">Pause Start (Kab se rukna hai)</span>
-                        <input type="datetime-local" id="configPauseStartDT" class="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm font-semibold text-slate-800 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <div onclick="openCustomPicker('start')" class="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-xs font-semibold text-slate-800 bg-slate-50 flex justify-between items-center cursor-pointer hover:bg-white transition">
+                            <span id="displayPauseStartText">Select Start Date & Time...</span>
+                            <i class="fa-solid fa-calendar-days text-indigo-600"></i>
+                        </div>
+                        <input type="hidden" id="configPauseStartDT">
                     </div>
+
                     <div>
                         <span class="text-[10px] text-slate-600 font-semibold block mb-0.5">Pause End (Kab tak rukna hai)</span>
-                        <input type="datetime-local" id="configPauseEndDT" class="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm font-semibold text-slate-800 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <div onclick="openCustomPicker('end')" class="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-xs font-semibold text-slate-800 bg-slate-50 flex justify-between items-center cursor-pointer hover:bg-white transition">
+                            <span id="displayPauseEndText">Select End Date & Time...</span>
+                            <i class="fa-solid fa-calendar-days text-indigo-600"></i>
+                        </div>
+                        <input type="hidden" id="configPauseEndDT">
                     </div>
+
                     <button type="button" onclick="clearScheduleDates()" class="text-[11px] text-indigo-600 hover:underline font-semibold pt-1">
                         Clear Schedule (Hamesha Chalu Rakhein)
                     </button>
@@ -364,6 +375,58 @@
             <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
                 <button onclick="toggleAdminModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
                 <button onclick="saveAdminConfig()" class="px-4 py-2 rounded-xl bg-amber-400 text-indigo-950 text-xs font-bold hover:bg-amber-300 shadow-sm">Save & Update</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM MOBILE-FRIENDLY DATETIME PICKER MODAL -->
+    <div id="customPickerModal" class="fixed inset-0 bg-slate-950/80 z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-xs p-5 shadow-2xl space-y-4 border border-slate-100">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                <h3 id="pickerTitle" class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-amber-500"></i> Select Date & Time
+                </h3>
+                <button onclick="closeCustomPicker()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Date (तारीख चुनें)</label>
+                    <input type="date" id="pickerDate" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm font-semibold text-slate-800 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Hour (घंटा)</label>
+                        <select id="pickerHour" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm font-semibold text-slate-800 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <!-- Populated via JS -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Minute (मिनट)</label>
+                        <select id="pickerMinute" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm font-semibold text-slate-800 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="00">00</option>
+                            <option value="05">05</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                            <option value="25">25</option>
+                            <option value="30">30</option>
+                            <option value="35">35</option>
+                            <option value="40">40</option>
+                            <option value="45">45</option>
+                            <option value="50">50</option>
+                            <option value="55">55</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button onclick="closeCustomPicker()" class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600">Cancel</button>
+                <button onclick="confirmCustomPicker()" class="px-4 py-2 rounded-xl bg-amber-400 text-indigo-950 text-xs font-bold shadow-sm">Set Time</button>
             </div>
         </div>
     </div>
@@ -407,9 +470,11 @@
         let currentSpeedStep = 0;
         const speedOptions = [3, 6, 9, 12, 15];
         let isAutoPaused = false;
+        let activePickerTarget = '';
 
         // Initialize App
         window.onload = function() {
+            populateHourOptions();
             const badge = document.getElementById('cloudStatusBadge');
             if (isCloudActive) {
                 badge.innerHTML = `<i class="fa-solid fa-circle text-[7px] text-emerald-400 mr-1 animate-pulse"></i>Cloud Live`;
@@ -429,6 +494,77 @@
             setInterval(updateISTClockAndSchedule, 1000);
             startRailgadiScroll();
         };
+
+        function populateHourOptions() {
+            const hourSelect = document.getElementById('pickerHour');
+            hourSelect.innerHTML = '';
+            for (let i = 0; i < 24; i++) {
+                const val = String(i).padStart(2, '0');
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.innerText = `${val} (Hour)`;
+                hourSelect.appendChild(opt);
+            }
+        }
+
+        // Custom Picker Functions
+        function openCustomPicker(target) {
+            activePickerTarget = target;
+            document.getElementById('pickerTitle').innerHTML = `<i class="fa-solid fa-calendar-days text-amber-500"></i> Select ${target === 'start' ? 'Pause Start' : 'Pause End'} Time`;
+            
+            const currentVal = target === 'start' ? upiConfig.pauseStartDT : upiConfig.pauseEndDT;
+            const now = new Date();
+            let dStr = now.toISOString().split('T')[0];
+            let hStr = String(now.getHours()).padStart(2, '0');
+            let mStr = "00";
+
+            if (currentVal) {
+                // currentVal format expected: YYYY-MM-DDTHH:mm
+                const parts = currentVal.split('T');
+                if (parts.length === 2) {
+                    dStr = parts[0];
+                    const hm = parts[1].split(':');
+                    hStr = hm[0];
+                    mStr = hm[1];
+                }
+            }
+
+            document.getElementById('pickerDate').value = dStr;
+            document.getElementById('pickerHour').value = hStr;
+            document.getElementById('pickerMinute').value = mStr;
+
+            document.getElementById('customPickerModal').classList.remove('hidden');
+        }
+
+        function closeCustomPicker() {
+            document.getElementById('customPickerModal').classList.add('hidden');
+        }
+
+        function confirmCustomPicker() {
+            const d = document.getElementById('pickerDate').value;
+            const h = document.getElementById('pickerHour').value;
+            const m = document.getElementById('pickerMinute').value;
+
+            if (!d) {
+                showToast("Kripya valid date chunein!", "error");
+                return;
+            }
+
+            const formattedDT = `${d}T${h}:${m}`;
+            const displayFriendly = new Date(formattedDT).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' });
+
+            if (activePickerTarget === 'start') {
+                upiConfig.pauseStartDT = formattedDT;
+                document.getElementById('configPauseStartDT').value = formattedDT;
+                document.getElementById('displayPauseStartText').innerText = displayFriendly;
+            } else {
+                upiConfig.pauseEndDT = formattedDT;
+                document.getElementById('configPauseEndDT').value = formattedDT;
+                document.getElementById('displayPauseEndText').innerText = displayFriendly;
+            }
+
+            closeCustomPicker();
+        }
 
         // Firebase Realtime Listeners
         function initCloudListeners() {
@@ -472,9 +608,25 @@
             document.getElementById('configUpiId').value = upiConfig.upiId;
             document.getElementById('configPayeeName').value = upiConfig.payeeName;
             document.getElementById('configAmount').value = upiConfig.amount;
-            document.getElementById('configPauseStartDT').value = upiConfig.pauseStartDT || '';
-            document.getElementById('configPauseEndDT').value = upiConfig.pauseEndDT || '';
             document.getElementById('configNewPassword').value = '';
+
+            upiConfig.pauseStartDT = upiConfig.pauseStartDT || '';
+            upiConfig.pauseEndDT = upiConfig.pauseEndDT || '';
+
+            document.getElementById('configPauseStartDT').value = upiConfig.pauseStartDT;
+            document.getElementById('configPauseEndDT').value = upiConfig.pauseEndDT;
+
+            if (upiConfig.pauseStartDT) {
+                document.getElementById('displayPauseStartText').innerText = new Date(upiConfig.pauseStartDT).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' });
+            } else {
+                document.getElementById('displayPauseStartText').innerText = "Select Start Date & Time...";
+            }
+
+            if (upiConfig.pauseEndDT) {
+                document.getElementById('displayPauseEndText').innerText = new Date(upiConfig.pauseEndDT).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' });
+            } else {
+                document.getElementById('displayPauseEndText').innerText = "Select End Date & Time...";
+            }
 
             const schedBadge = document.getElementById('autoScheduleBadge');
             if (upiConfig.pauseStartDT && upiConfig.pauseEndDT) {
@@ -514,8 +666,12 @@
         }
 
         function clearScheduleDates() {
+            upiConfig.pauseStartDT = '';
+            upiConfig.pauseEndDT = '';
             document.getElementById('configPauseStartDT').value = '';
             document.getElementById('configPauseEndDT').value = '';
+            document.getElementById('displayPauseStartText').innerText = "Select Start Date & Time...";
+            document.getElementById('displayPauseEndText').innerText = "Select End Date & Time...";
         }
 
         function adminClearAllRecords() {
@@ -536,8 +692,6 @@
             const newUpi = document.getElementById('configUpiId').value.trim();
             const newName = document.getElementById('configPayeeName').value.trim();
             const newAmt = document.getElementById('configAmount').value.trim();
-            const pStartDT = document.getElementById('configPauseStartDT').value;
-            const pEndDT = document.getElementById('configPauseEndDT').value;
             const newPass = document.getElementById('configNewPassword').value.trim();
 
             if (!newUpi || !newAmt || newAmt <= 0) {
@@ -548,8 +702,6 @@
             upiConfig.upiId = newUpi;
             upiConfig.payeeName = newName || "Mahasha Evening Lottery";
             upiConfig.amount = newAmt;
-            upiConfig.pauseStartDT = pStartDT;
-            upiConfig.pauseEndDT = pEndDT;
             if (newPass) {
                 upiConfig.adminPass = newPass;
             }
@@ -730,7 +882,6 @@
             singleLoopHeight = container.offsetHeight / 2;
         }
 
-        // Scrolling always runs in background; between dates it pauses movement
         function startRailgadiScroll() {
             if (scrollAnimationId) cancelAnimationFrame(scrollAnimationId);
             scrollYPos = 0;
@@ -750,7 +901,6 @@
             scrollAnimationId = requestAnimationFrame(step);
         }
 
-        // Date Range Pause Verification & Dynamic Banner Update
         function updateISTClockAndSchedule() {
             const now = new Date();
             const timeStr = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false }) + " IST";
@@ -766,7 +916,6 @@
                 const endMs = new Date(upiConfig.pauseEndDT).getTime();
                 const nowMs = now.getTime();
 
-                // Format dates nicely for display
                 const fmtStart = new Date(upiConfig.pauseStartDT).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' });
                 const fmtEnd = new Date(upiConfig.pauseEndDT).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' });
 
