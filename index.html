@@ -216,13 +216,16 @@
             <!-- Transaction Table -->
             <div class="overflow-x-auto max-h-64 scrollbar-thin">
                 <table class="w-full text-left text-xs border-collapse">
-                    <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider text-[10px] sticky top-0">
+                    <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider text-[10px] sticky top-0 z-10">
                         <tr>
+                            <th class="p-2 border-b text-center">Fake</th>
                             <th class="p-2 border-b">Ticket #</th>
+                            <th class="p-2 border-b">Date/Time</th>
                             <th class="p-2 border-b">UTR No</th>
                             <th class="p-2 border-b">Name</th>
                             <th class="p-2 border-b">Mobile</th>
                             <th class="p-2 border-b">Amount</th>
+                            <th class="p-2 border-b text-center">Del</th>
                         </tr>
                     </thead>
                     <tbody id="logsTableBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
@@ -568,6 +571,7 @@
         const speedOptions = [3, 6, 9, 12, 15];
         let isAutoPaused = false;
         let activePickerTarget = '';
+        let pendingAdminAction = null;
 
         // Initialize App
         window.onload = function() {
@@ -846,12 +850,14 @@
             document.getElementById('speedMultiplier').innerText = `${newSpeed}x`;
         }
 
-        function promptAdminPassword() {
+        function promptAdminPassword(callback = null) {
+            pendingAdminAction = callback;
             document.getElementById('adminPasswordInput').value = '';
             document.getElementById('passwordModal').classList.remove('hidden');
         }
 
         function closePasswordModal() {
+            pendingAdminAction = null;
             document.getElementById('passwordModal').classList.add('hidden');
         }
 
@@ -859,8 +865,13 @@
             const entered = document.getElementById('adminPasswordInput').value;
             const correctPass = upiConfig.adminPass || "1234";
             if (entered === correctPass) {
+                const actionToRun = pendingAdminAction;
                 closePasswordModal();
-                toggleAdminModal();
+                if (actionToRun) {
+                    actionToRun();
+                } else {
+                    toggleAdminModal();
+                }
             } else {
                 showToast("Galat Password! Kripya sahi password dalein.", "error");
             }
@@ -887,6 +898,7 @@
                     allRecords = [];
                     localStorage.removeItem('mahasha_payment_logs');
                     renderLogs();
+                    renderResultCards();
                 }
                 toggleAdminModal();
                 showToast("Sabhi payment records safalta se delete kar diye gaye hain.", "info");
@@ -966,7 +978,8 @@
                 mobile: mobile,
                 name: name,
                 utr: utr,
-                targetUpi: upiConfig.upiId
+                targetUpi: upiConfig.upiId,
+                isFake: false
             };
 
             if (isCloudActive) {
@@ -975,11 +988,49 @@
                 allRecords.unshift(newRecord);
                 localStorage.setItem('mahasha_payment_logs', JSON.stringify(allRecords));
                 renderLogs();
+                renderResultCards();
             }
 
             showToast(`Ticket ${ticketNo} Verified & Saved Successfully!`, "success");
             document.getElementById('paymentForm').reset();
             document.getElementById('formAmountDisplay').innerText = upiConfig.amount;
+        }
+
+        // Toggle Fake Status (Admin Password Protected)
+        function handleFakeCheckboxClick(event, recordId) {
+            event.preventDefault();
+            const record = allRecords.find(r => r.id === recordId);
+            if (!record) return;
+            const targetState = !record.isFake;
+
+            promptAdminPassword(() => {
+                if (isCloudActive) {
+                    db.ref('lottery/records/' + recordId + '/isFake').set(targetState);
+                } else {
+                    record.isFake = targetState;
+                    localStorage.setItem('mahasha_payment_logs', JSON.stringify(allRecords));
+                    renderLogs();
+                    renderResultCards();
+                }
+                showToast(targetState ? "Record ko FAKE mark kar diya gaya hai!" : "Record se FAKE mark hata diya gaya hai.", targetState ? "error" : "success");
+            });
+        }
+
+        // Delete Single Record (Admin Password Protected)
+        function handleDeleteSingleRecord(recordId) {
+            promptAdminPassword(() => {
+                if (confirm("Kya aap sach me is record ko delete karna chahte hain?")) {
+                    if (isCloudActive) {
+                        db.ref('lottery/records/' + recordId).remove();
+                    } else {
+                        allRecords = allRecords.filter(r => r.id !== recordId);
+                        localStorage.setItem('mahasha_payment_logs', JSON.stringify(allRecords));
+                        renderLogs();
+                        renderResultCards();
+                    }
+                    showToast("Record delete kar diya gaya hai!", "info");
+                }
+            });
         }
 
         function renderLogs() {
@@ -989,7 +1040,9 @@
 
             let totalAmount = 0;
             allRecords.forEach(item => {
-                totalAmount += parseFloat(item.amount || 0);
+                if (!item.isFake) {
+                    totalAmount += parseFloat(item.amount || 0);
+                }
             });
 
             document.getElementById('totalCollectedDisplay').innerText = totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1004,13 +1057,22 @@
 
             allRecords.forEach(item => {
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50 transition';
+                tr.className = item.isFake ? 'bg-rose-50 hover:bg-rose-100/80 transition' : 'hover:bg-slate-50 transition';
                 tr.innerHTML = `
-                    <td class="p-2 border-b font-mono font-bold text-indigo-700">${item.ticketNo}</td>
-                    <td class="p-2 border-b font-mono text-slate-600 font-semibold">${item.utr}</td>
-                    <td class="p-2 border-b font-semibold text-slate-800">${item.name}</td>
-                    <td class="p-2 border-b text-slate-600">${item.mobile}</td>
-                    <td class="p-2 border-b font-bold text-emerald-600">₹${item.amount}</td>
+                    <td class="p-2 border-b text-center">
+                        <input type="checkbox" ${item.isFake ? 'checked' : ''} onclick="handleFakeCheckboxClick(event, ${item.id})" title="Mark as Fake (Admin)" class="w-4 h-4 accent-rose-600 cursor-pointer rounded">
+                    </td>
+                    <td class="p-2 border-b font-mono font-bold ${item.isFake ? 'text-rose-600' : 'text-indigo-700'} whitespace-nowrap">${item.ticketNo}</td>
+                    <td class="p-2 border-b text-[10px] text-slate-500 whitespace-nowrap">${item.timestamp || '-'}</td>
+                    <td class="p-2 border-b font-mono whitespace-nowrap ${item.isFake ? 'text-rose-600 font-black' : 'text-slate-600 font-semibold'}">${item.isFake ? 'FAKE' : item.utr}</td>
+                    <td class="p-2 border-b font-semibold text-slate-800 whitespace-nowrap">${item.name}</td>
+                    <td class="p-2 border-b text-slate-600 whitespace-nowrap">${item.mobile}</td>
+                    <td class="p-2 border-b font-bold ${item.isFake ? 'text-rose-500 line-through' : 'text-emerald-600'} whitespace-nowrap">₹${item.amount}</td>
+                    <td class="p-2 border-b text-center">
+                        <button onclick="handleDeleteSingleRecord(${item.id})" title="Delete Record (Admin)" class="text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 p-1.5 rounded-lg transition">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </td>
                 `;
                 tableBody.appendChild(tr);
             });
@@ -1064,15 +1126,27 @@
                 `;
             } else {
                 allRecords.forEach(item => {
-                    baseHTML += `
-                        <div class="pb-3 px-4">
-                            <div class="p-4 bg-slate-800/90 border border-amber-400/30 rounded-2xl shadow-lg text-center">
-                                <span class="text-xs font-mono text-amber-400 font-bold">${item.ticketNo} | UTR: ${item.utr}</span>
-                                <h4 class="text-lg font-black text-white mt-0.5">${item.name}</h4>
-                                <p class="text-xs text-indigo-300 font-medium">Mobile: ${item.mobile} | Paid: ₹${item.amount}</p>
+                    if (item.isFake) {
+                        baseHTML += `
+                            <div class="pb-3 px-4">
+                                <div class="p-4 bg-rose-950/95 border-2 border-rose-500 rounded-2xl shadow-lg text-center">
+                                    <span class="text-xs font-mono text-rose-200 font-bold">${item.ticketNo} | UTR: <span class="font-black text-white bg-rose-600 px-1.5 py-0.5 rounded tracking-wider">FAKE</span></span>
+                                    <h4 class="text-lg font-black text-white mt-0.5">${item.name}</h4>
+                                    <p class="text-xs text-rose-200 font-medium">Mobile: ${item.mobile} | Paid: ₹${item.amount}</p>
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    } else {
+                        baseHTML += `
+                            <div class="pb-3 px-4">
+                                <div class="p-4 bg-slate-800/90 border border-amber-400/30 rounded-2xl shadow-lg text-center">
+                                    <span class="text-xs font-mono text-amber-400 font-bold">${item.ticketNo} | UTR: ${item.utr}</span>
+                                    <h4 class="text-lg font-black text-white mt-0.5">${item.name}</h4>
+                                    <p class="text-xs text-indigo-300 font-medium">Mobile: ${item.mobile} | Paid: ₹${item.amount}</p>
+                                </div>
+                            </div>
+                        `;
+                    }
                 });
             }
 
@@ -1167,9 +1241,10 @@
                 showToast("Export karne ke liye koi record nahi hai!", "error");
                 return;
             }
-            let csvContent = "data:text/csv;charset=utf-8,Ticket Number,UTR Number,Timestamp,Name,Mobile,Amount,UPI ID\r\n";
+            let csvContent = "data:text/csv;charset=utf-8,Status,Ticket Number,UTR Number,Timestamp,Name,Mobile,Amount,UPI ID\r\n";
             allRecords.forEach(row => {
-                csvContent += `"${row.ticketNo}","${row.utr}","${row.timestamp}","${row.name}","${row.mobile}","${row.amount}","${row.targetUpi}"\r\n`;
+                const status = row.isFake ? "FAKE" : "VALID";
+                csvContent += `"${status}","${row.ticketNo}","${row.utr}","${row.timestamp}","${row.name}","${row.mobile}","${row.amount}","${row.targetUpi}"\r\n`;
             });
             const link = document.createElement("a");
             link.setAttribute("href", encodeURI(csvContent));
