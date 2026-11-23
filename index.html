@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mahasha Evening Lottery</title>
+    <title>Mahasha Saturday Lottery</title>
     <!-- Open Graph / WhatsApp Preview Tags -->
-    <meta property="og:title" content="Mahasha Evening Lottery - Official Draw & Live Results">
+    <meta property="og:title" content="Mahasha Saturday Lottery - Official Draw & Live Results">
     <meta property="og:description" content="Official lottery draw. Participate securely and check live results instantly.">
     <meta property="og:image" content="https://amritsarzone1-sys.github.io/Mahasha-Lottery/thumbnail.png">
     <meta property="og:image:width" content="1200">
@@ -59,7 +59,7 @@
                             </span>
                         </div>
                         <h1 id="headerTitleDisplay" class="font-lottery font-black text-base sm:text-lg gold-gradient-text tracking-wide drop-shadow-sm mt-0.5">
-                            MAHASHA EVENING LOTTERY
+                            MAHASHA SATURDAY LOTTERY
                         </h1>
                         <p class="text-[10px] text-indigo-200 font-semibold tracking-wider uppercase -mt-0.5">
                             <i class="fa-solid fa-clover text-amber-400 mr-0.5"></i>Whatsapp: 7837338831
@@ -106,7 +106,7 @@
                 <div>
                     <p class="text-[11px] text-indigo-300 font-medium">Receiver UPI Address</p>
                     <p id="displayUpiId" class="font-bold text-amber-300 text-sm break-all font-mono">amritsarzone1-1@oksbi</p>
-                    <p id="displayPayeeName" class="text-[11px] text-slate-300 font-medium mt-0.5">Mahasha Evening Lottery</p>
+                    <p id="displayPayeeName" class="text-[11px] text-slate-300 font-medium mt-0.5">Mahasha Saturday Lottery</p>
                 </div>
                 <div class="text-right bg-amber-400/10 border border-amber-400/40 p-2.5 rounded-xl">
                     <p class="text-[10px] text-amber-300 uppercase font-bold tracking-wider">Fixed Ticket Price</p>
@@ -251,7 +251,7 @@
                 </button>
             </div>
             <div id="displayNoticeContent" class="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-200 min-h-[120px]">
-                Mahasha Evening Lottery me aapka swagat hai! Admin dwara koi notice update nahi kiya gaya hai.
+                Mahasha Saturday Lottery me aapka swagat hai! Admin dwara koi notice update nahi kiya gaya hai.
             </div>
             <div class="flex justify-end pt-2 border-t border-slate-100">
                 <button onclick="closeNoticeModal()" class="px-4 py-2 rounded-xl bg-indigo-950 text-white text-xs font-bold shadow-sm hover:bg-indigo-900">Band Karein</button>
@@ -396,7 +396,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Portal Title / Header Name</label>
-                    <input type="text" id="configPayeeName" value="MAHASHA EVENING LOTTERY" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold text-indigo-950 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <input type="text" id="configPayeeName" value="MAHASHA SATURDAY LOTTERY" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold text-indigo-950 focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
 
                 <!-- Admin Notice Text Area -->
@@ -554,9 +554,9 @@
         // System State
         let upiConfig = {
             upiId: "amritsarzone1-1@oksbi",
-            payeeName: "MAHASHA EVENING LOTTERY",
+            payeeName: "MAHASHA SATURDAY LOTTERY",
             amount: "10",
-            noticeText: "Mahasha Evening Lottery me aapka swagat hai! Yahan aap apne tickets aur live results dekh sakte hain.",
+            noticeText: "Mahasha Saturday Lottery me aapka swagat hai! Yahan aap apne tickets aur live results dekh sakte hain.",
             pauseStartDT: "",
             pauseEndDT: "",
             adminPass: "1234"
@@ -712,7 +712,7 @@
 
         // Update UI Elements
         function updateConfigUI() {
-            const portalTitle = upiConfig.payeeName || "MAHASHA EVENING LOTTERY";
+            const portalTitle = upiConfig.payeeName || "MAHASHA SATURDAY LOTTERY";
             document.getElementById('headerTitleDisplay').innerText = portalTitle;
             document.getElementById('displayPayeeName').innerText = portalTitle;
             
@@ -724,7 +724,7 @@
             document.getElementById('configPayeeName').value = portalTitle;
             document.getElementById('configAmount').value = upiConfig.amount;
             document.getElementById('configNoticeText').value = upiConfig.noticeText || "";
-            document.getElementById('displayNoticeContent').innerText = upiConfig.noticeText || "Mahasha Evening Lottery me aapka swagat hai! Admin dwara koi notice update nahi kiya gaya hai.";
+            document.getElementById('displayNoticeContent').innerText = upiConfig.noticeText || "Mahasha Saturday Lottery me aapka swagat hai! Admin dwara koi notice update nahi kiya gaya hai.";
             document.getElementById('configNewPassword').value = '';
 
             upiConfig.pauseStartDT = upiConfig.pauseStartDT || '';
@@ -918,7 +918,7 @@
             }
 
             upiConfig.upiId = newUpi;
-            upiConfig.payeeName = newName || "MAHASHA EVENING LOTTERY";
+            upiConfig.payeeName = newName || "MAHASHA SATURDAY LOTTERY";
             upiConfig.amount = newAmt;
             upiConfig.noticeText = newNotice;
             if (newPass) {
